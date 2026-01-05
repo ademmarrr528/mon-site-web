@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>premiere exercice</title>
+</head>
+<style>
+    .container {
+
+        display: grid;
+        grid-template-columns: 2fr 2fr 2fr ;
+        grid-template-rows: 1fr 1fr 1fr;
+
+    }
+
+    article {
+        border: solid blue;
+        background-color: grey;
+        padding: 10px;
+    }
+
+    .item1 {
+        grid-column: 1;
+        grid-row: 1/3;
+    }
+   
+</style>
+<body>
+    <div class="container">
+        <article class="item1">1</article>
+        <article class="item2">2</article>
+        <article class="item3">3</article>
+        <article class="item4">4</article>
+        <article class="item5">5</article>
+        <article class="item6">6</article>
+        <article class="item7">7</article>
+        <article class="item8">8</article>
+    </div>
+</body>
+</html>
