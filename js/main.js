@@ -1,5 +1,5 @@
 /* =========================================================
-   PORTFOLIO — script principal
+   PORTFOLIO ADEM MARINE — script principal
    1. Contenu : projets, menu, liens, formulaire, showreel…
       (fonctionne même si les animations ne chargent pas)
    2. Animations : écran de chargement, défilement fluide (Lenis),
@@ -23,12 +23,8 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  // Assombrit une couleur (pour le fond de chaque diapositive projet)
-  function darken(hex, keep = 0.22) {
-    const n = parseInt(hex.replace('#', ''), 16);
-    const mix = (c) => Math.round(c * keep + 10 * (1 - keep));
-    return `rgb(${mix(n >> 16)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
-  }
+  // Fonds des diapositives : crème et gris pierre en alternance (la couleur reste dans le visuel)
+  const slideBgs = ['#f4f2ec', '#e6e2d8'];
 
 
   /* =======================================================
@@ -38,14 +34,15 @@
   /* ---------- Diapositives des projets ---------- */
   const categories = { affiche: 'Affiche', print: 'Print & bannières', web: 'Concept web' };
   $('.projects__slides').innerHTML = projets.map((p, i) => `
-    <article class="slide" style="--bg:${darken(p.couleur)};--c:${esc(p.couleur)}" aria-label="Projet ${i + 1} : ${esc(p.titre)}">
-      <div class="slide__top"><span><b>${pad(i + 1)}</b> / Projet</span><span>${esc(categories[p.categorie] || p.categorie)}</span></div>
+    <article class="slide" style="--bg:${slideBgs[i % 2]};--c:${esc(p.couleur)}" aria-label="Projet ${i + 1} : ${esc(p.titre)}">
+      <div class="slide__top"><span><b>${pad(i + 1)}</b> / Projets</span><span>${esc(categories[p.categorie] || p.categorie)}</span></div>
       <div class="slide__body">
         <div class="slide__text">
-          <p class="slide__tags"><b>${esc(p.titre)}</b>${esc(p.type)} · ${esc(p.annee)}</p>
+          <p class="slide__tags">${esc(p.type)} · ${esc(p.annee)}</p>
           <h3 class="slide__title">${esc(p.titre)}</h3>
           <p class="slide__desc">${esc(p.description)}</p>
-          <button class="slide__link" type="button" data-index="${i}">Voir le projet <span class="round" aria-hidden="true">→</span></button>
+          <button class="pill pill--dark slide__link" type="button" data-index="${i}">Voir le projet <span class="round round--light" aria-hidden="true">→</span></button>
+          ${i === 0 ? '<p class="note slide__note">Clique pour l\'agrandir</p>' : ''}
         </div>
         <figure class="slide__media"><img src="${esc(p.image)}" alt="${esc(p.titre)}, ${esc(p.type)}" loading="lazy" width="640" height="960"></figure>
       </div>
@@ -187,6 +184,27 @@
   cycle($('.hero__list'), 1800);
   cycle($('.rotator'), 2000);
 
+  /* ---------- Grands mots (PLAY, FOCUS, TEAM) ajustés à la largeur de l'écran ---------- */
+  const fitTargets = [['.bigword__word', 0.88], ['.how__word', 0.8], ['.testimonial__word', 0.6]];
+  function fitWords() {
+    fitTargets.forEach(([sel, ratio]) => {
+      const el = $(sel);
+      if (!el) return;
+      el.style.fontSize = '100px';
+      const size = (100 * window.innerWidth * ratio) / el.scrollWidth;
+      el.style.fontSize = `${Math.min(size, window.innerHeight * 0.95).toFixed(1)}px`;
+    });
+  }
+  fitWords();
+  if (document.fonts) document.fonts.ready.then(fitWords);
+  let lastWidth = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === lastWidth) return; // ignore la barre d'adresse mobile
+    lastWidth = window.innerWidth;
+    fitWords();
+    if (motion) ScrollTrigger.refresh();
+  });
+
   /* Pas d'animations : tout s'affiche directement */
   if (!motion) {
     root.classList.add('no-motion');
@@ -214,33 +232,28 @@
 
   // On attend les polices pour découper les textes au bon endroit
   Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), wait(2500)]).then(() => {
+    fitWords();
     buildScrollAnimations();
     setupHeader();
     if (finePointer) setupCursor();
     playLoader();
   });
 
-  /* ---------- Écran de chargement ---------- */
+  /* ---------- Écran de chargement : pile de photos + compteur ---------- */
   function playLoader() {
-    const tiles = $$('.loader__grid img');
-    const logo = $('.loader__logo text');
+    const photos = $$('.loader__stack img');
+    const num = $('.loader__num');
+    const counter = { v: 0 };
     const hero = heroIntro();
-    gsap.set(tiles, { filter: 'blur(0px)' });
-    gsap.set(logo, { strokeDasharray: 3000, strokeDashoffset: 3000 });
-    gsap.set('.loader__brand', { clipPath: 'inset(0% 0% 0% 0%)' });
+    photos.forEach((img) => gsap.set(img, { rotation: gsap.utils.random(-9, 9), scale: 0.9, y: 20 }));
 
     const tl = gsap.timeline({ onComplete: finishLoader });
-    tl.to(tiles, { opacity: 1, duration: 0.2, stagger: { each: 0.045, from: 'random' } })
-      .to(tiles, { opacity: 0, filter: 'blur(14px)', duration: 0.5, stagger: { each: 0.02, from: 'random' } }, '+=0.3')
-      .to(logo, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut' }, '-=0.3')
-      .to(logo, { fill: '#f4f1ea', duration: 0.35 }, '-=0.2')
-      .to('.loader__tag', { opacity: 1, duration: 0.4 }, '<')
-      .to('.loader__brand', { clipPath: 'inset(0% 50% 0% 50%)', duration: 0.7, ease: 'expo.inOut' }, '+=0.45')
-      .to('.loader__skip', { autoAlpha: 0, duration: 0.3 }, '<')
-      .to('.loader__curtain--left', { xPercent: -1.5, duration: 0.3, ease: 'power2.out' }, '-=0.15')
-      .to('.loader__curtain--right', { xPercent: 1.5, duration: 0.3, ease: 'power2.out' }, '<')
-      .to('.loader__curtain--left', { xPercent: -101, duration: 1, ease: 'expo.inOut' })
-      .to('.loader__curtain--right', { xPercent: 101, duration: 1, ease: 'expo.inOut' }, '<')
+    tl.from('.loader__note', { autoAlpha: 0, y: 10, duration: 0.6, stagger: 0.15 }, 0.1)
+      .to(photos, { opacity: 1, scale: 1, y: 0, duration: 0.35, stagger: 0.12, ease: 'back.out(1.6)' }, 0)
+      .to(counter, { v: 100, duration: 0.12 * photos.length + 0.25, ease: 'none', onUpdate: () => { num.textContent = Math.round(counter.v); } }, 0)
+      .to(['.loader__note', '.loader__count', '.loader__skip'], { autoAlpha: 0, duration: 0.3 }, '+=0.25')
+      .to(photos, { yPercent: -40, opacity: 0, rotation: '+=8', duration: 0.6, stagger: { each: 0.025, from: 'end' }, ease: 'power3.in' }, '<')
+      .to('.loader', { clipPath: 'inset(0% 0% 100% 0%)', duration: 1, ease: 'expo.inOut' }, '-=0.25')
       .add(hero.play(), '-=0.55');
 
     $('.loader__skip').addEventListener('click', () => tl.progress(1));
@@ -254,25 +267,25 @@
 
   // Apparition de l'accueil (lancée par l'écran de chargement)
   function heroIntro() {
-    const chars = SplitText.create('.hero__logo', { type: 'chars', mask: 'chars' }).chars;
+    const chars = SplitText.create('.hero__name', { type: 'chars', mask: 'chars' }).chars;
     return gsap.timeline({ paused: true })
-      .from(chars, { yPercent: 110, duration: 1.2, stagger: 0.06, ease: 'expo.out' })
-      .from('.hero__star', { scale: 0, rotation: -120, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 50%' }, 0.2)
-      .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.35);
+      .from(chars, { yPercent: 110, duration: 1.2, stagger: 0.04, ease: 'expo.out' })
+      .from('.hero__badge', { scale: 0, rotation: -120, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 50%' }, 0.2)
+      .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.35)
+      .from('.hero__note', { autoAlpha: 0, y: -10, rotation: 14, duration: 0.8, ease: 'back.out(2)' }, 0.7);
   }
 
   /* ---------- Animations au scroll ---------- */
   function buildScrollAnimations() {
     const vh = () => window.innerHeight;
 
-    // 1. Accueil : le texte s'efface, l'étoile grossit jusqu'à remplir l'écran
-    const starWrap = $('.hero__star-wrap');
+    // 1. Accueil : le texte s'efface, le macaron grossit en tournant jusqu'à remplir l'écran
+    const badgeWrap = $('.hero__badge-wrap');
     gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140%', pin: true, scrub: 1, invalidateOnRefresh: true } })
-      .to(['.hero__logo', '.hero__texts'], { y: -70, autoAlpha: 0, duration: 0.25, stagger: 0.03, ease: 'power2.in' }, 0)
-      .to(starWrap, { y: () => vh() / 2 - (starWrap.offsetTop + starWrap.offsetHeight / 2), duration: 0.3, ease: 'power2.inOut' }, 0.05)
-      .to(starWrap, { scale: 70, rotation: 140, duration: 0.65, ease: 'power3.in' }, 0.32)
-      .to('.hero', { backgroundColor: '#8f8c86', duration: 0.25, ease: 'none' }, 0.5)
-      .to('.hero', { backgroundColor: '#0a0a0b', duration: 0.2, ease: 'none' }, 0.78);
+      .to(['.hero__name', '.hero__note', '.hero__texts'], { y: -70, autoAlpha: 0, duration: 0.25, stagger: 0.03, ease: 'power2.in' }, 0)
+      .to(badgeWrap, { y: () => vh() / 2 - (badgeWrap.offsetTop + badgeWrap.offsetHeight / 2), duration: 0.3, ease: 'power2.inOut' }, 0.05)
+      .to(badgeWrap, { scale: 70, rotation: 160, duration: 0.65, ease: 'power3.in' }, 0.32)
+      .to('.hero', { backgroundColor: '#546a55', duration: 0.2, ease: 'none' }, 0.78);
 
     // 2. Image + accroche
     gsap.fromTo('.intro__img', { scale: 1.18 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.intro', start: 'top bottom', end: 'bottom top', scrub: true } });
@@ -283,32 +296,31 @@
     revealLines('.lead__text', '.lead__text');
     gsap.from(['.lead .label', '.lead__sign'], { y: 20, autoAlpha: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.lead', start: 'top 70%' } });
 
-    // 4. Showreel : la vidéo grandit, le fond passe du noir au crème puis la vidéo prend tout l'écran
+    // 4. Showreel : le cadre grandit, le fond passe du crème au gris pierre, puis l'image prend tout l'écran
     gsap.timeline({
       scrollTrigger: {
         trigger: '.reel', start: 'top top', end: '+=230%', pin: true, scrub: 1,
-        onUpdate: (self) => setHeaderTheme(self.progress > 0.12 && self.progress < 0.62 ? 'dark' : 'light'),
+        onUpdate: (self) => setHeaderTheme(self.progress < 0.62 ? 'dark' : 'light'),
       },
     })
-      .to('.reel', { backgroundColor: '#8f8c86', duration: 0.12, ease: 'none' }, 0)
-      .to('.reel', { backgroundColor: '#f4f1ea', duration: 0.12, ease: 'none' }, 0.12)
+      .to('.reel', { backgroundColor: '#dad6cd', duration: 0.24, ease: 'none' }, 0)
       .fromTo('.reel__box', { scale: 0.3 }, { scale: 0.72, duration: 0.45, ease: 'power1.inOut' }, 0)
       .fromTo('.reel__title', { yPercent: 0 }, { yPercent: -70, duration: 0.45, ease: 'power1.inOut' }, 0)
       .to('.reel__kicker', { autoAlpha: 0, y: -30, duration: 0.15 }, 0.3)
-      .to('.reel__box', { scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.3, ease: 'power2.inOut' }, 0.55)
+      .to('.reel__box', { scale: 1, borderRadius: 0, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.3, ease: 'power2.inOut' }, 0.55)
       .to('.reel__controls', { opacity: 1, duration: 0.08 }, 0.8)
       .to({}, { duration: 0.15 });
 
-    // 5. Manifeste : trois phrases qui s'allument puis laissent la place
+    // 5. Manifeste : trois phrases qui s'allument puis laissent la place, le macaron tourne
     const blocks = $$('.manifesto__block');
     const mTl = gsap.timeline({ scrollTrigger: { trigger: '.manifesto', start: 'top top', end: '+=430%', pin: true, scrub: 1 } });
-    mTl.to('.manifesto__star', { rotation: 200, scale: 1.12, ease: 'none', duration: blocks.length }, 0);
+    mTl.to('.manifesto__badge', { rotation: 200, scale: 1.12, ease: 'none', duration: blocks.length }, 0);
     blocks.forEach((block, i) => {
       const title = SplitText.create($('.manifesto__title', block), { type: 'words' }).words;
       const accent = SplitText.create($('.manifesto__accent', block), { type: 'words' }).words;
       const sub = $('.manifesto__sub', block);
       if (i > 0) { gsap.set(block, { autoAlpha: 0 }); mTl.set(block, { autoAlpha: 1 }, i); }
-      mTl.fromTo(title, { opacity: 0.16 }, { opacity: 1, stagger: 0.03, duration: 0.3, ease: 'none' }, i);
+      mTl.fromTo(title, { opacity: 0.2 }, { opacity: 1, stagger: 0.03, duration: 0.3, ease: 'none' }, i);
       if (sub) mTl.fromTo(sub, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.1 }, i + 0.28);
       mTl.fromTo(accent, { opacity: 0, yPercent: 35 }, { opacity: 1, yPercent: 0, stagger: 0.035, duration: 0.25, ease: 'power2.out' }, i + 0.36);
       if (i < blocks.length - 1) mTl.to(block, { autoAlpha: 0, y: -50, duration: 0.14 }, i + 0.86);
@@ -324,13 +336,14 @@
     gsap.fromTo('.bracket--right', { xPercent: 70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
     const defChars = SplitText.create('.definition__word', { type: 'chars', mask: 'chars' }).chars;
     gsap.from(defChars, { yPercent: 110, duration: 1.1, stagger: 0.07, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 80%' } });
-    gsap.from('.definition__star', { scale: 0, rotation: -180, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 75%' } });
+    gsap.from('.definition__badge', { scale: 0, rotation: -180, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 75%' } });
+    gsap.from('.definition__note', { autoAlpha: 0, rotation: 6, duration: 0.8, ease: 'back.out(2)', scrollTrigger: { trigger: '.definition__word', start: 'top 70%' } });
     const defWords = SplitText.create('.definition__text', { type: 'words' }).words;
-    gsap.fromTo(defWords, { color: '#c9c6be' }, { color: '#0a0a0b', stagger: 0.05, ease: 'none', scrollTrigger: { trigger: '.definition__text', start: 'top 78%', end: 'bottom 45%', scrub: 1 } });
+    gsap.fromTo(defWords, { color: '#cfcac0' }, { color: '#252422', stagger: 0.05, ease: 'none', scrollTrigger: { trigger: '.definition__text', start: 'top 78%', end: 'bottom 45%', scrub: 1 } });
     gsap.from(['.definition__phon', '.definition__syn', '.definition__who'], { y: 16, autoAlpha: 0, duration: 0.8, stagger: 0.1, scrollTrigger: { trigger: '.definition__phon', start: 'top 85%' } });
     marquee($('.tools__track'), 36, 1);
 
-    // 7. Nom géant rempli d'une photo, puis la question
+    // 7. Grand mot rempli d'une photo, puis la question
     const q1 = SplitText.create('.bigword__question', { type: 'words' }).words;
     gsap.timeline({ scrollTrigger: { trigger: '.bigword', start: 'top top', end: '+=170%', pin: true, scrub: 1 } })
       .fromTo('.bigword__word', { scale: 1.9 }, { scale: 0.92, duration: 0.5, ease: 'power2.out' }, 0)
@@ -368,7 +381,7 @@
     const moreTitle = SplitText.create('.more__title', { type: 'words' }).words;
     gsap.from(moreTitle, { yPercent: 50, autoAlpha: 0, duration: 1, stagger: 0.05, ease: 'expo.out', scrollTrigger: { trigger: '.more', start: 'top 60%' } });
     $$('.more__row').forEach((row, i) => marquee(row, 30 + i * 6, i % 2 ? -1 : 1, true));
-    gsap.to('.more__star', { rotation: 120, ease: 'none', scrollTrigger: { trigger: '.more', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.to('.more__badge', { rotation: 120, ease: 'none', scrollTrigger: { trigger: '.more', start: 'top bottom', end: 'bottom top', scrub: true } });
 
     // 11. Et concrètement ?
     const q2 = SplitText.create('.how__question', { type: 'words' }).words;
@@ -376,7 +389,7 @@
       .fromTo('.how__word', { yPercent: 30, scale: 1.15 }, { yPercent: -8, scale: 1, duration: 0.5 }, 0)
       .fromTo('.how__img', { scale: 1.15 }, { scale: 1, duration: 1, ease: 'none' }, 0)
       .to('.how__word', { opacity: 0.22, duration: 0.2 }, 0.5)
-      .to('.how__img', { filter: 'brightness(0.25) contrast(1.1)', duration: 0.3 }, 0.5)
+      .to('.how__img', { filter: 'brightness(0.32)', duration: 0.3 }, 0.5)
       .fromTo(q2, { opacity: 0, yPercent: 40, filter: 'blur(8px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.04, duration: 0.25 }, 0.55);
 
     // 12. Méthode
@@ -384,7 +397,7 @@
     gsap.from(methodWords, { yPercent: 50, autoAlpha: 0, duration: 1, stagger: 0.05, ease: 'expo.out', scrollTrigger: { trigger: '.method', start: 'top 65%' } });
     gsap.from(['.method .label', '.method__hint'], { autoAlpha: 0, y: 12, duration: 0.8, stagger: 0.15, scrollTrigger: { trigger: '.method', start: 'top 65%' } });
     $$('.method__name').forEach((name) => {
-      gsap.fromTo(name, { color: 'rgba(244, 241, 234, 0.14)', x: 40 }, { color: 'rgba(244, 241, 234, 1)', x: 0, ease: 'none', scrollTrigger: { trigger: name, start: 'top 88%', end: 'top 58%', scrub: 1 } });
+      gsap.fromTo(name, { color: 'rgba(37, 36, 34, 0.14)', x: 40 }, { color: 'rgba(37, 36, 34, 1)', x: 0, ease: 'none', scrollTrigger: { trigger: name, start: 'top 88%', end: 'top 58%', scrub: 1 } });
     });
     gsap.from('.method__note', { autoAlpha: 0, y: 16, duration: 0.8, scrollTrigger: { trigger: '.method__note', start: 'top 90%' } });
 
@@ -392,7 +405,7 @@
     const q3 = SplitText.create('.doubt__title', { type: 'words' }).words;
     gsap.timeline({ scrollTrigger: { trigger: '.doubt', start: 'top top', end: '+=120%', pin: true, scrub: 1 } })
       .fromTo('.doubt__img', { scale: 1.2 }, { scale: 1, duration: 1, ease: 'none' }, 0)
-      .fromTo('.doubt__stage', { '--dark': 0.08 }, { '--dark': 0.62, duration: 0.6 }, 0.2)
+      .fromTo('.doubt__stage', { '--dark': 0.08 }, { '--dark': 0.58, duration: 0.6 }, 0.2)
       .fromTo(q3, { opacity: 0, yPercent: 40, filter: 'blur(8px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.05, duration: 0.3 }, 0.25);
 
     // 14. Confiance : la liste de noms défile
@@ -411,13 +424,14 @@
 
     // 16. Témoignage
     gsap.fromTo('.testimonial__img', { scale: 1.2 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.testimonial', start: 'top bottom', end: 'bottom top', scrub: true } });
-    gsap.fromTo('.testimonial__word', { yPercent: 25 }, { yPercent: -10, ease: 'none', scrollTrigger: { trigger: '.testimonial', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.fromTo('.testimonial__word', { yPercent: 12 }, { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.testimonial', start: 'top bottom', end: 'bottom top', scrub: true } });
     gsap.from(['.testimonial__text > *', '.testimonial__cta'], { y: 30, autoAlpha: 0, duration: 1, stagger: 0.1, ease: 'expo.out', scrollTrigger: { trigger: '.testimonial', start: 'top 55%' } });
 
     // 17. Pied de page
     revealLines('.footer__title', '.footer');
     const footChars = SplitText.create('.footer__logo', { type: 'chars', mask: 'chars' }).chars;
-    gsap.from(footChars, { yPercent: 110, duration: 1.1, stagger: 0.06, ease: 'expo.out', scrollTrigger: { trigger: '.footer__logo', start: 'top 92%' } });
+    gsap.from(footChars, { yPercent: 110, duration: 1.1, stagger: 0.04, ease: 'expo.out', scrollTrigger: { trigger: '.footer__logo', start: 'top 92%' } });
+    gsap.from('.footer__sticker', { scale: 0, rotation: -90, duration: 1.2, ease: 'back.out(1.6)', scrollTrigger: { trigger: '.footer', start: 'top 70%' } });
   }
 
   // Fait monter les lignes d'un texte depuis un masque
@@ -457,8 +471,6 @@
         onToggle: (self) => { if (self.isActive) setHeaderTheme(section.dataset.header); },
       });
     });
-    const reelSpacer = $('.reel').parentElement;
-    ScrollTrigger.create({ trigger: reelSpacer, start: 'top 40px', end: 'bottom 40px', onToggle: (self) => { if (self.isActive) setHeaderTheme('light'); } });
     ScrollTrigger.create({
       trigger: '.lead', start: 'top 60%',
       onEnter: () => header.classList.add('is-compact'),

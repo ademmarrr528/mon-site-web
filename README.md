@@ -2,7 +2,12 @@
 
 Portfolio de graphiste et direction artistique (BUT MMI), pensé pour décrocher un stage en agence de communication.
 
-**Base de travail :** une reproduction de la structure et des animations de [ownitt.fr](https://ownitt.fr/), avec mes propres textes provisoires, mes visuels et mon nom. Les prochaines étapes consistent à la personnaliser (éléments de [Lando Norris](https://landonorris.com/), [Aengel](https://aengel.io/lite), [Duda Lima](https://www.duda.works/)…).
+**Inspirations :**
+- structure et animations : [ownitt.fr](https://ownitt.fr/) ;
+- couleurs et ambiance : le [lookbook Quechua SS25](https://quechua-lookbook.com/ss25/fr/) (papier crème avec grain, charbon, vert sauge, rouille, coins arrondis, annotations manuscrites) ;
+- univers : sport (foot, F1), musique (rap, R&B), jeux vidéo, affiche et pub.
+
+**Identité :** le symbole est un *macaron* (le badge à bords festonnés des stickers « Nouveau ! » en pub). Il sert de logo avec « AM » découpé dedans, et il reprend les animations de l'accueil, du manifeste et du pied de page. Le nom complet « Adem Marine » n'apparaît qu'à l'accueil et dans le pied de page.
 
 ## Voir le site sur ton ordi
 
@@ -30,17 +35,17 @@ archives/           → mon premier exercice de grille CSS
 
 | Section | Ce qui se passe |
 | --- | --- |
-| Écran de chargement | Grille de photos, nom dessiné au trait puis rempli, ouverture en rideau |
-| Accueil | Nom, étoile, disciplines qui défilent ; au scroll l'étoile grossit jusqu'à remplir l'écran |
+| Écran de chargement | Pile de photos qui s'empilent, compteur en %, annotations manuscrites |
+| Accueil | Nom, macaron, disciplines qui défilent ; au scroll le macaron grossit en tournant jusqu'à remplir l'écran de vert |
 | Image + accroche | Grande photo, phrase d'accroche, mot qui change en bas |
 | Paragraphe | Présentation, les lignes montent une à une |
-| Showreel | Le cadre grandit au scroll, le fond passe du noir au crème |
-| Manifeste | Trois phrases qui s'allument mot par mot, grande étoile qui tourne |
-| Définition | « Adem* », parenthèses qui se referment, bandeau des outils |
-| Nom géant | Le nom rempli d'une photo, puis une question |
+| Showreel | Le cadre arrondi grandit au scroll jusqu'à prendre tout l'écran |
+| Manifeste | Fond vert sauge, trois phrases qui s'allument mot par mot, grand macaron qui tourne |
+| Définition | « Créa », parenthèses qui se referment, bandeau des outils |
+| PLAY | Le mot rempli d'une photo de concert, puis une question |
 | Projets | Une diapositive par projet, chacune recouvre la précédente |
 | Aperçu | Noms qui défilent dans les deux sens |
-| Et concrètement ? | Nom géant sur photo, question |
+| Et concrètement ? | « FOCUS » sur photo, question |
 | Méthode | Cinq terrains ; au survol, le mot défile et les détails apparaissent |
 | Encore un doute ? | Photo qui s'assombrit, question |
 | Confiance, Journal, Témoignage | Liste qui défile, articles, appel à l'action |
@@ -52,7 +57,7 @@ archives/           → mon premier exercice de grille CSS
 2. Ouvre `js/projets.js`, copie un bloc `{ ... }` et change les infos.
 3. Enregistre : les diapositives et l'index à droite se mettent à jour tout seuls.
 
-La couleur de fond de chaque diapositive est calculée à partir de la `couleur` du projet (version très sombre).
+Les diapositives alternent crème et gris pierre ; la `couleur` du projet sert de fond au cadre du visuel.
 
 ## Les outils utilisés (à savoir expliquer en entretien)
 
@@ -63,7 +68,9 @@ La couleur de fond de chaque diapositive est calculée à partir de la `couleur`
 | SplitText (plugin GSAP) | Découpe les textes en lettres, mots ou lignes pour les animer |
 | [Lenis](https://lenis.darkroom.engineering/) | Défilement fluide |
 
-Polices (Google Fonts, gratuites) : **Barlow Condensed** pour les titres et **Fraunces** pour le texte. Elles remplacent les polices payantes d'Ownitt (Elza Condensed et IvyPresto).
+Polices (Google Fonts, gratuites) : **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (PLAY, FOCUS, TEAM) et **Covered By Your Grace** pour les annotations manuscrites.
+
+Couleurs : crème `#f4f2ec`, charbon `#252422`, gris pierre `#dad6cd`, vert sauge `#546a55` et une seule couleur d'accent, la rouille `#c4512f`, utilisée par petites touches.
 
 ## Crédits des images provisoires
 
@@ -71,7 +78,6 @@ Les photos de `assets/img/` viennent de [Lorem Picsum](https://picsum.photos/), 
 
 ## Reste à faire
 
-- [ ] Mettre ton vrai nom (ou ton pseudo) à la place de « Adem »
 - [ ] Réécrire les textes provisoires avec tes mots
 - [ ] Remplacer les affiches d'exemple par tes vrais projets
 - [ ] Remplacer les photos d'ambiance (idéalement par tes propres photos ou visuels)
