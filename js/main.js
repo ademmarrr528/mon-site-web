@@ -1,251 +1,196 @@
 /* =========================================================
    PORTFOLIO — script principal
-   1. Contenu : anneau d'affiches, liste des projets, filtres,
-      visionneuse, menu, copie de l'e-mail, essai de couleur.
-      Tout ça fonctionne même si les animations ne chargent pas.
+   1. Contenu : projets, menu, liens, formulaire, showreel…
+      (fonctionne même si les animations ne chargent pas)
    2. Animations : écran de chargement, défilement fluide (Lenis),
-      animations au scroll (GSAP + ScrollTrigger + SplitText),
-      curseur et aperçu des projets.
+      animations au scroll (GSAP + ScrollTrigger + SplitText).
    ========================================================= */
 (function () {
   'use strict';
 
   const root = document.documentElement;
-  const projets = window.PROJETS || [];
+  const projets = (window.PROJETS || []).slice(0, 8);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const motion = !!(window.gsap && window.ScrollTrigger && window.SplitText) && !reduceMotion;
 
-  let lenis = null;      // défilement fluide (créé plus bas si les animations sont actives)
+  let lenis = null;
   let menuOpen = false;
-  let hidePreview = () => {}; // remplacé par la vraie fonction quand le curseur est actif
 
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-  const pad = (n, len = 2) => String(n).padStart(len, '0');
+  const pad = (n) => String(n).padStart(2, '0');
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // Assombrit une couleur (pour le fond de chaque diapositive projet)
+  function darken(hex, keep = 0.22) {
+    const n = parseInt(hex.replace('#', ''), 16);
+    const mix = (c) => Math.round(c * keep + 10 * (1 - keep));
+    return `rgb(${mix(n >> 16)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
+  }
 
 
   /* =======================================================
      1. CONTENU
      ======================================================= */
 
-  /* ---------- Anneau 3D d'affiches ---------- */
-  const ringScene = $('.ring-scene');
-  const ring = $('.ring');
-  const ringProjets = projets.slice(0, 12);
-  ring.style.setProperty('--n', ringProjets.length);
-  ring.insertAdjacentHTML('afterbegin', ringProjets.map((p, i) =>
-    `<figure class="ring__item" style="--i:${i}" aria-hidden="true"><img src="${esc(p.image)}" alt="" width="640" height="960" decoding="async"></figure>`
-  ).join(''));
-  const ringItems = $$('.ring__item', ring);
+  /* ---------- Diapositives des projets ---------- */
+  const categories = { affiche: 'Affiche', print: 'Print & bannières', web: 'Concept web' };
+  $('.projects__slides').innerHTML = projets.map((p, i) => `
+    <article class="slide" style="--bg:${darken(p.couleur)};--c:${esc(p.couleur)}" aria-label="Projet ${i + 1} : ${esc(p.titre)}">
+      <div class="slide__top"><span><b>${pad(i + 1)}</b> / Projet</span><span>${esc(categories[p.categorie] || p.categorie)}</span></div>
+      <div class="slide__body">
+        <div class="slide__text">
+          <p class="slide__tags"><b>${esc(p.titre)}</b>${esc(p.type)} · ${esc(p.annee)}</p>
+          <h3 class="slide__title">${esc(p.titre)}</h3>
+          <p class="slide__desc">${esc(p.description)}</p>
+          <button class="slide__link" type="button" data-index="${i}">Voir le projet <span class="round" aria-hidden="true">→</span></button>
+        </div>
+        <figure class="slide__media"><img src="${esc(p.image)}" alt="${esc(p.titre)}, ${esc(p.type)}" loading="lazy" width="640" height="960"></figure>
+      </div>
+      <span class="slide__num" aria-hidden="true">${pad(i + 1)}</span>
+    </article>`).join('');
+  $('.projects__index').innerHTML = projets.map((p, i) => `<li${i === 0 ? ' class="is-active"' : ''}>${pad(i + 1)}</li>`).join('');
+  const slides = $$('.slide');
+  const indexItems = $$('.projects__index li');
 
-  /* ---------- Liste des projets ---------- */
-  const list = $('.list');
-  list.innerHTML = projets.map((p, i) => `
-    <li class="row" data-cat="${esc(p.categorie)}">
-      <button class="row__btn" type="button" data-index="${i}" style="--c:${esc(p.couleur)};--ci:${esc(p.encre)}">
-        <span class="row__num mono">${pad(i + 1)}</span>
-        <span class="row__title">${esc(p.titre)}</span>
-        <span class="row__cat mono">${esc(p.type)}</span>
-        <span class="row__year mono">${esc(p.annee)}</span>
-        <img class="row__thumb" src="${esc(p.image)}" alt="" loading="lazy" width="640" height="960">
-      </button>
-    </li>`).join('');
-  const rows = $$('.row', list);
-  $('.projets__count').textContent = `(${pad(projets.length)})`;
-
-  /* ---------- Filtres ---------- */
-  const filters = $$('.filter');
-  filters.forEach((btn) => {
-    const f = btn.dataset.filter;
-    const n = f === 'tout' ? projets.length : projets.filter((p) => p.categorie === f).length;
-    $('.filter__n', btn).textContent = n;
-    if (f !== 'tout' && n === 0) btn.hidden = true;
-
-    btn.addEventListener('click', () => {
-      filters.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      rows.forEach((row) => { row.hidden = !(f === 'tout' || row.dataset.cat === f); });
-      if (motion) {
-        gsap.fromTo(rows.filter((r) => !r.hidden),
-          { y: 24, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.04, ease: 'power3.out', overwrite: true });
-        ScrollTrigger.refresh();
-      }
-    });
-  });
-
-  /* ---------- Visionneuse plein écran ---------- */
+  /* ---------- Visionneuse ---------- */
   const viewer = $('#viewer');
-  const viewerImg = $('.viewer__img', viewer);
-  let current = 0;
-
-  function fillViewer(i) {
-    const p = projets[i];
-    current = i;
-    viewerImg.src = p.image;
-    viewerImg.alt = `${p.titre}, ${p.type}`;
-    $('.viewer__meta', viewer).textContent = `${pad(i + 1)} · ${p.type} · ${p.annee}`;
-    $('.viewer__title', viewer).textContent = p.titre;
-    $('.viewer__desc', viewer).textContent = p.description;
-  }
-
-  function animateViewer() {
-    if (!motion) return;
-    gsap.fromTo('.viewer__media', { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'expo.out' });
-    gsap.fromTo('.viewer__info > *', { y: 24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.05, ease: 'power3.out', delay: 0.1 });
-  }
-
-  function openViewer(i) {
-    fillViewer(i);
-    hidePreview();
-    if (typeof viewer.showModal === 'function') viewer.showModal();
-    else viewer.setAttribute('open', '');
+  $('.projects__slides').addEventListener('click', (e) => {
+    const btn = e.target.closest('.slide__link');
+    if (!btn) return;
+    const p = projets[Number(btn.dataset.index)];
+    const img = $('.viewer__img', viewer);
+    img.src = p.image;
+    img.alt = `${p.titre}, ${p.type}`;
+    if (typeof viewer.showModal === 'function') viewer.showModal(); else viewer.setAttribute('open', '');
     if (lenis) lenis.stop();
-    animateViewer();
-  }
-
-  function stepViewer(dir) {
-    const visibles = rows.filter((r) => !r.hidden).map((r) => Number($('.row__btn', r).dataset.index));
-    const pos = visibles.indexOf(current);
-    fillViewer(visibles[(pos + dir + visibles.length) % visibles.length]);
-    animateViewer();
-  }
-
-  list.addEventListener('click', (e) => {
-    const btn = e.target.closest('.row__btn');
-    if (btn) openViewer(Number(btn.dataset.index));
   });
   $('.viewer__close', viewer).addEventListener('click', () => viewer.close());
-  $$('.viewer__btn', viewer).forEach((b) => b.addEventListener('click', () => stepViewer(Number(b.dataset.step))));
-  viewer.addEventListener('click', (e) => {
-    if (e.target === viewer || e.target.classList.contains('viewer__inner')) viewer.close();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (!viewer.open) return;
-    if (e.key === 'ArrowRight') stepViewer(1);
-    if (e.key === 'ArrowLeft') stepViewer(-1);
-  });
+  viewer.addEventListener('click', (e) => { if (e.target === viewer || e.target.classList.contains('viewer__inner')) viewer.close(); });
   viewer.addEventListener('close', () => { if (lenis && !menuOpen) lenis.start(); });
 
   /* ---------- Menu plein écran ---------- */
+  const header = $('.header');
   const menu = $('#menu');
   const menuBtn = $('.menu-btn');
-  const menuText = $('.menu-btn__text');
+  const menuCols = $$('.menu__col');
+
+  function openCol(col) { menuCols.forEach((c) => c.classList.toggle('is-open', c === col)); }
+  menuCols.forEach((col) => {
+    col.addEventListener('mouseenter', () => openCol(col));
+    col.addEventListener('focusin', () => openCol(col));
+  });
 
   function setMenu(open) {
     menuOpen = open;
     menuBtn.setAttribute('aria-expanded', String(open));
-    menuText.textContent = open ? 'Fermer' : 'Menu';
-
+    $('.menu-btn__text').textContent = open ? 'Fermer' : 'Menu';
+    header.classList.toggle('is-menu', open);
     if (open) {
       menu.hidden = false;
+      openCol(menuCols[0]);
       if (lenis) lenis.stop();
       if (motion) {
-        gsap.fromTo(menu, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'expo.inOut' });
-        gsap.fromTo('.menu__big', { yPercent: 60, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.9, stagger: 0.07, ease: 'expo.out', delay: 0.3 });
-        gsap.fromTo(['.menu__sub', '.menu__foot'], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, delay: 0.6 });
+        gsap.fromTo(menu, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, ease: 'expo.inOut' });
+        gsap.fromTo(menuCols, { yPercent: 100 }, { yPercent: 0, duration: 1.1, stagger: 0.06, ease: 'expo.out', delay: 0.25 });
+        gsap.fromTo(['.menu__top > *', '.menu__bottom > *'], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, delay: 0.6 });
       }
-      $('.menu__link', menu).focus({ preventScroll: true });
+      $('a', menuCols[0]).focus({ preventScroll: true });
     } else {
       const done = () => { menu.hidden = true; };
-      if (motion) gsap.to(menu, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.6, ease: 'expo.inOut', onComplete: done });
+      if (motion) gsap.to(menu, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.7, ease: 'expo.inOut', onComplete: done });
       else done();
       if (lenis) lenis.start();
     }
   }
-
   menuBtn.addEventListener('click', () => setMenu(!menuOpen));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && menuOpen) { setMenu(false); menuBtn.focus(); }
   });
 
-  /* ---------- Liens internes (#section) : défilement doux ---------- */
+  /* ---------- Liens internes : défilement doux ---------- */
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
     if (!a || a.classList.contains('skip-link')) return;
-    const target = a.getAttribute('href').length > 1 ? $(a.getAttribute('href')) : null;
+    const id = a.getAttribute('href');
+    const target = id.length > 1 ? $(id) : null;
     if (!target) return;
     e.preventDefault();
     if (menuOpen) setMenu(false);
-    if (lenis) lenis.scrollTo(target, { duration: 1.4 });
+    if (lenis) lenis.scrollTo(target, { duration: 1.6 });
     else target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
   });
 
-  /* ---------- Copier l'adresse e-mail ---------- */
-  $$('.copy-btn').forEach((btn) => {
-    const label = btn.textContent;
-    btn.addEventListener('click', () => {
-      const done = (ok) => {
-        btn.textContent = ok ? 'Adresse copiée' : 'Adresse sélectionnée';
-        btn.classList.add('is-done');
-        setTimeout(() => { btn.textContent = label; btn.classList.remove('is-done'); }, 2200);
-      };
-      const selectText = () => {
-        const range = document.createRange();
-        range.selectNodeContents($('#email'));
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        done(false);
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(btn.dataset.copy).then(() => done(true), selectText);
+  /* ---------- Formulaire de contact (démonstration) ---------- */
+  $('.footer__form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $('#email-contact');
+    const msg = $('.footer__msg');
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+    msg.textContent = ok
+      ? "Merci ! (Formulaire de démonstration : rien n'a été envoyé pour l'instant.)"
+      : 'Entre une adresse e-mail valide, par exemple prenom@email.fr.';
+  });
+
+  /* ---------- Showreel : diaporama, pause, plein écran ---------- */
+  const reelImgs = $$('.reel__slides img');
+  const playBtn = $('.reel__play');
+  let reelIndex = 0;
+  let reelTimer = null;
+  function nextReel() {
+    reelImgs[reelIndex].classList.remove('is-active');
+    reelIndex = (reelIndex + 1) % reelImgs.length;
+    reelImgs[reelIndex].classList.add('is-active');
+  }
+  function playReel(on) {
+    clearInterval(reelTimer);
+    if (on) reelTimer = setInterval(nextReel, 2800);
+    playBtn.textContent = on ? '❚❚ Pause' : '▶ Lecture';
+    playBtn.dataset.playing = on ? '1' : '0';
+  }
+  playReel(!reduceMotion);
+  playBtn.addEventListener('click', () => playReel(playBtn.dataset.playing !== '1'));
+  $('.reel__full').addEventListener('click', () => {
+    const box = $('.reel__box');
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else if (box.requestFullscreen) box.requestFullscreen().catch(() => {});
+  });
+
+  /* ---------- Méthode : bandeau au survol ---------- */
+  $$('.method__item').forEach((item) => {
+    const name = $('.method__name', item).textContent;
+    $('.method__marquee', item).innerHTML = Array.from({ length: 6 }, () => `<span>${esc(name)}</span>`).join('');
+    if (finePointer) {
+      item.addEventListener('mouseenter', () => item.classList.add('is-hover'));
+      item.addEventListener('mouseleave', () => item.classList.remove('is-hover'));
+    }
+  });
+
+  /* ---------- Listes qui défilent toutes seules (accueil + accroche) ---------- */
+  function cycle(list, delay) {
+    if (reduceMotion || !list) return;
+    setInterval(() => {
+      const first = list.firstElementChild;
+      const h = first.offsetHeight;
+      if (window.gsap) {
+        gsap.to(list.children, {
+          y: -h, duration: 0.8, ease: 'expo.inOut',
+          onComplete: () => { list.appendChild(first); gsap.set(list.children, { y: 0 }); },
+        });
       } else {
-        selectText();
+        list.appendChild(first);
       }
-    });
-  });
-
-  /* ---------- Essai de couleur d'accent (temporaire) ---------- */
-  const swatches = $$('.swatch');
-  function setAccent(name) {
-    if (name === 'nb') root.removeAttribute('data-accent');
-    else root.setAttribute('data-accent', name);
-    swatches.forEach((s) => s.setAttribute('aria-pressed', String(s.dataset.accent === name)));
-    try { localStorage.setItem('portfolio-accent', name); } catch (err) { /* stockage indisponible */ }
+    }, delay);
   }
-  let savedAccent = 'nb';
-  try { savedAccent = localStorage.getItem('portfolio-accent') || 'nb'; } catch (err) { /* stockage indisponible */ }
-  setAccent(swatches.some((s) => s.dataset.accent === savedAccent) ? savedAccent : 'nb');
-  swatches.forEach((s) => s.addEventListener('click', () => setAccent(s.dataset.accent)));
+  cycle($('.hero__list'), 1800);
+  cycle($('.rotator'), 2000);
 
-  /* ---------- Gros textes ajustés à la largeur de l'écran ---------- */
-  const heroStage = $('.hero__stage');
-  const heroTitle = $('.hero__title');
-  const heroName = $('.hero__name');
-  const footerName = $('.footer__name');
-
-  // Donne au texte la taille qui remplit exactement la largeur disponible
-  function fit(el, available, maxSize) {
-    el.style.fontSize = '100px';
-    let size = (100 * available) / el.offsetWidth;
-    if (maxSize) size = Math.min(size, maxSize);
-    el.style.fontSize = `${size.toFixed(2)}px`;
-  }
-  function fitAll() {
-    const gutter = parseFloat(getComputedStyle($('.section')).paddingLeft) || 16;
-    fit(heroName, heroStage.clientWidth - gutter * 2, window.innerHeight * 0.62);
-    fit(footerName, footerName.parentElement.clientWidth);
-  }
-  fitAll();
-
-  let lastWidth = window.innerWidth;
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    if (window.innerWidth === lastWidth) return; // ignore la barre d'adresse mobile
-    lastWidth = window.innerWidth;
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      fitAll();
-      if (motion) ScrollTrigger.refresh();
-    }, 150);
-  });
-
-  /* Pas d'animations : on affiche tout directement */
+  /* Pas d'animations : tout s'affiche directement */
   if (!motion) {
+    root.classList.add('no-motion');
     root.classList.remove('is-loading');
-    if (document.fonts) document.fonts.ready.then(fitAll);
     return;
   }
 
@@ -256,239 +201,281 @@
 
   gsap.registerPlugin(ScrollTrigger, SplitText);
   ScrollTrigger.config({ ignoreMobileResize: true });
-  root.classList.add('has-motion');
 
-  /* ---------- Défilement fluide ---------- */
   if (window.Lenis) {
-    lenis = new Lenis({ lerp: 0.1 });
+    lenis = new Lenis({ lerp: 0.09 });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
-    lenis.stop(); // bloqué pendant l'écran de chargement
+    lenis.stop();
   }
   menu.setAttribute('data-lenis-prevent', '');
   viewer.setAttribute('data-lenis-prevent', '');
 
-  /* ---------- Anneau 3D : rotation, souris, scroll ---------- */
-  const ringState = { idle: 0, scroll: 0, zoom: 0, intro: 0, mx: 0, my: 0, tmx: 0, tmy: 0 };
-  const step = 360 / Math.max(ringItems.length, 1);
-  let heroTrigger = null;
-
-  ringScene.style.opacity = 0;
-  gsap.ticker.add((time, deltaTime) => {
-    const scrolled = lenis ? lenis.scroll : window.scrollY;
-    if (heroTrigger && scrolled > heroTrigger.end + window.innerHeight) return; // hors écran : on économise
-
-    ringState.idle += deltaTime * 0.005;                     // ~5° par seconde
-    ringState.mx += (ringState.tmx - ringState.mx) * 0.05;   // suivi doux de la souris
-    ringState.my += (ringState.tmy - ringState.my) * 0.05;
-
-    const ry = ringState.idle + ringState.scroll + ringState.mx * 16;
-    const rx = -8 - ringState.zoom * 10 - ringState.my * 6;
-    const scale = (0.65 + 0.35 * ringState.intro) * (1 + ringState.zoom * 0.35);
-
-    ring.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-    // Le nom tourne en sens inverse pour toujours rester face à nous
-    heroTitle.style.transform = `rotateY(${(-ry).toFixed(2)}deg) rotateX(${(-rx).toFixed(2)}deg)`;
-    ringScene.style.opacity = ringState.intro.toFixed(3);
-
-    // Les affiches de l'arrière de l'anneau sont plus sombres
-    ringItems.forEach((item, i) => {
-      const facing = (Math.cos(((i * step + ry) * Math.PI) / 180) + 1) / 2;
-      item.style.opacity = (0.18 + 0.82 * facing * facing).toFixed(3);
-    });
+  // On attend les polices pour découper les textes au bon endroit
+  Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), wait(2500)]).then(() => {
+    buildScrollAnimations();
+    setupHeader();
+    if (finePointer) setupCursor();
+    playLoader();
   });
-
-  window.addEventListener('pointermove', (e) => {
-    ringState.tmx = (e.clientX / window.innerWidth - 0.5) * 2;
-    ringState.tmy = (e.clientY / window.innerHeight - 0.5) * 2;
-  }, { passive: true });
 
   /* ---------- Écran de chargement ---------- */
-  const loaderNum = $('.loader__num');
-  const counter = { v: 0 };
-  const showCount = () => { loaderNum.textContent = pad(Math.round(counter.v), 3); };
+  function playLoader() {
+    const tiles = $$('.loader__grid img');
+    const logo = $('.loader__logo text');
+    const hero = heroIntro();
+    gsap.set(tiles, { filter: 'blur(0px)' });
+    gsap.set(logo, { strokeDasharray: 3000, strokeDashoffset: 3000 });
+    gsap.set('.loader__brand', { clipPath: 'inset(0% 0% 0% 0%)' });
 
-  const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-  const imagesReady = Promise.all($$('img', ring).map((img) => (img.decode ? img.decode().catch(() => {}) : Promise.resolve())));
-  const assetsReady = Promise.race([Promise.all([fontsReady, imagesReady]), new Promise((r) => setTimeout(r, 3500))]);
-  const countUp = gsap.to(counter, { v: 90, duration: 1.4, ease: 'power2.inOut', onUpdate: showCount });
+    const tl = gsap.timeline({ onComplete: finishLoader });
+    tl.to(tiles, { opacity: 1, duration: 0.2, stagger: { each: 0.045, from: 'random' } })
+      .to(tiles, { opacity: 0, filter: 'blur(14px)', duration: 0.5, stagger: { each: 0.02, from: 'random' } }, '+=0.3')
+      .to(logo, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut' }, '-=0.3')
+      .to(logo, { fill: '#f4f1ea', duration: 0.35 }, '-=0.2')
+      .to('.loader__tag', { opacity: 1, duration: 0.4 }, '<')
+      .to('.loader__brand', { clipPath: 'inset(0% 50% 0% 50%)', duration: 0.7, ease: 'expo.inOut' }, '+=0.45')
+      .to('.loader__skip', { autoAlpha: 0, duration: 0.3 }, '<')
+      .to('.loader__curtain--left', { xPercent: -1.5, duration: 0.3, ease: 'power2.out' }, '-=0.15')
+      .to('.loader__curtain--right', { xPercent: 1.5, duration: 0.3, ease: 'power2.out' }, '<')
+      .to('.loader__curtain--left', { xPercent: -101, duration: 1, ease: 'expo.inOut' })
+      .to('.loader__curtain--right', { xPercent: 101, duration: 1, ease: 'expo.inOut' }, '<')
+      .add(hero.play(), '-=0.55');
 
-  Promise.all([assetsReady, countUp.then()]).then(() => {
-    gsap.to(counter, { v: 100, duration: 0.35, ease: 'power1.out', onUpdate: showCount, onComplete: start });
-  });
+    $('.loader__skip').addEventListener('click', () => tl.progress(1));
+  }
 
-  function start() {
-    fitAll();
-    const heroSplit = buildScrollAnimations();
-    if (finePointer) setupCursor();
+  function finishLoader() {
+    root.classList.remove('is-loading');
+    if (lenis && !menuOpen) lenis.start();
+    ScrollTrigger.refresh();
+  }
 
-    gsap.timeline({ onComplete: () => { if (lenis && !menuOpen) lenis.start(); } })
-      .to('.loader__num', { yPercent: -105, duration: 0.6, ease: 'power3.in' })
-      .to('.loader__label', { autoAlpha: 0, duration: 0.3 }, '<')
-      .to('.loader', { clipPath: 'inset(0% 0% 100% 0%)', duration: 1, ease: 'expo.inOut' }, '-=0.1')
-      .add(() => root.classList.remove('is-loading'))
-      .from(heroSplit.chars, { yPercent: 105, duration: 1.2, stagger: 0.07, ease: 'expo.out' }, '-=0.55')
-      .to(ringState, { intro: 1, duration: 1.8, ease: 'expo.out' }, '<')
-      .from(['.header', '.hero__bottom > *', '.scroll-badge svg', '.scroll-badge__arrow'],
-        { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, '-=1.2');
+  // Apparition de l'accueil (lancée par l'écran de chargement)
+  function heroIntro() {
+    const chars = SplitText.create('.hero__logo', { type: 'chars', mask: 'chars' }).chars;
+    return gsap.timeline({ paused: true })
+      .from(chars, { yPercent: 110, duration: 1.2, stagger: 0.06, ease: 'expo.out' })
+      .from('.hero__star', { scale: 0, rotation: -120, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 50%' }, 0.2)
+      .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.35);
   }
 
   /* ---------- Animations au scroll ---------- */
   function buildScrollAnimations() {
-    // Nom : lettres découpées pour l'apparition
-    const heroSplit = SplitText.create(heroName, { type: 'chars', mask: 'chars' });
+    const vh = () => window.innerHeight;
 
-    // Accueil épinglé : l'anneau tourne et se rapproche, le nom s'efface
-    const heroTl = gsap.timeline({
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=100%', pin: true, scrub: true },
-    });
-    heroTl
-      .to(ringState, { scroll: 150, zoom: 1, ease: 'none', duration: 1 }, 0)
-      .to('.hero__fade', { yPercent: -14, scale: 0.88, autoAlpha: 0, ease: 'power1.in', duration: 0.75 }, 0.25)
-      .to(['.hero__bottom', '.scroll-badge'], { y: -40, autoAlpha: 0, ease: 'none', duration: 0.35 }, 0);
-    heroTrigger = heroTl.scrollTrigger;
+    // 1. Accueil : le texte s'efface, l'étoile grossit jusqu'à remplir l'écran
+    const starWrap = $('.hero__star-wrap');
+    gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140%', pin: true, scrub: 1, invalidateOnRefresh: true } })
+      .to(['.hero__logo', '.hero__texts'], { y: -70, autoAlpha: 0, duration: 0.25, stagger: 0.03, ease: 'power2.in' }, 0)
+      .to(starWrap, { y: () => vh() / 2 - (starWrap.offsetTop + starWrap.offsetHeight / 2), duration: 0.3, ease: 'power2.inOut' }, 0.05)
+      .to(starWrap, { scale: 70, rotation: 140, duration: 0.65, ease: 'power3.in' }, 0.32)
+      .to('.hero', { backgroundColor: '#8f8c86', duration: 0.25, ease: 'none' }, 0.5)
+      .to('.hero', { backgroundColor: '#0a0a0b', duration: 0.2, ease: 'none' }, 0.78);
 
-    // Manifeste : les mots s'allument au fil du scroll
-    const manifesto = SplitText.create('.manifeste__text', { type: 'words' });
-    gsap.fromTo(manifesto.words, { opacity: 0.14 }, {
-      opacity: 1, ease: 'none', stagger: 0.1,
-      scrollTrigger: { trigger: '.manifeste__text', start: 'top 80%', end: 'bottom 50%', scrub: true },
-    });
-    gsap.from('.manifeste__cols p', {
-      y: 30, autoAlpha: 0, duration: 1, stagger: 0.12, ease: 'power3.out',
-      scrollTrigger: { trigger: '.manifeste__cols', start: 'top 85%' },
+    // 2. Image + accroche
+    gsap.fromTo('.intro__img', { scale: 1.18 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.intro', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.from('.intro__line', { yPercent: 60, autoAlpha: 0, duration: 1.1, stagger: 0.1, ease: 'expo.out', scrollTrigger: { trigger: '.intro', start: 'top 55%' } });
+    gsap.from('.intro__rotator', { autoAlpha: 0, duration: 1, scrollTrigger: { trigger: '.intro', start: 'top 40%' } });
+
+    // 3. Paragraphe : les lignes montent une à une
+    revealLines('.lead__text', '.lead__text');
+    gsap.from(['.lead .label', '.lead__sign'], { y: 20, autoAlpha: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.lead', start: 'top 70%' } });
+
+    // 4. Showreel : la vidéo grandit, le fond passe du noir au crème puis la vidéo prend tout l'écran
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: '.reel', start: 'top top', end: '+=230%', pin: true, scrub: 1,
+        onUpdate: (self) => setHeaderTheme(self.progress > 0.12 && self.progress < 0.62 ? 'dark' : 'light'),
+      },
+    })
+      .to('.reel', { backgroundColor: '#8f8c86', duration: 0.12, ease: 'none' }, 0)
+      .to('.reel', { backgroundColor: '#f4f1ea', duration: 0.12, ease: 'none' }, 0.12)
+      .fromTo('.reel__box', { scale: 0.3 }, { scale: 0.72, duration: 0.45, ease: 'power1.inOut' }, 0)
+      .fromTo('.reel__title', { yPercent: 0 }, { yPercent: -70, duration: 0.45, ease: 'power1.inOut' }, 0)
+      .to('.reel__kicker', { autoAlpha: 0, y: -30, duration: 0.15 }, 0.3)
+      .to('.reel__box', { scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.3, ease: 'power2.inOut' }, 0.55)
+      .to('.reel__controls', { opacity: 1, duration: 0.08 }, 0.8)
+      .to({}, { duration: 0.15 });
+
+    // 5. Manifeste : trois phrases qui s'allument puis laissent la place
+    const blocks = $$('.manifesto__block');
+    const mTl = gsap.timeline({ scrollTrigger: { trigger: '.manifesto', start: 'top top', end: '+=430%', pin: true, scrub: 1 } });
+    mTl.to('.manifesto__star', { rotation: 200, scale: 1.12, ease: 'none', duration: blocks.length }, 0);
+    blocks.forEach((block, i) => {
+      const title = SplitText.create($('.manifesto__title', block), { type: 'words' }).words;
+      const accent = SplitText.create($('.manifesto__accent', block), { type: 'words' }).words;
+      const sub = $('.manifesto__sub', block);
+      if (i > 0) { gsap.set(block, { autoAlpha: 0 }); mTl.set(block, { autoAlpha: 1 }, i); }
+      mTl.fromTo(title, { opacity: 0.16 }, { opacity: 1, stagger: 0.03, duration: 0.3, ease: 'none' }, i);
+      if (sub) mTl.fromTo(sub, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.1 }, i + 0.28);
+      mTl.fromTo(accent, { opacity: 0, yPercent: 35 }, { opacity: 1, yPercent: 0, stagger: 0.035, duration: 0.25, ease: 'power2.out' }, i + 0.36);
+      if (i < blocks.length - 1) mTl.to(block, { autoAlpha: 0, y: -50, duration: 0.14 }, i + 0.86);
     });
 
-    // Bandeau : défile en continu, accélère et change de sens avec le scroll
-    const track = $('.marquee__track');
-    const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 32, repeat: -1 });
-    loop.totalTime(loop.duration() * 100); // permet de repartir en arrière
-    const skewTo = gsap.quickTo(track, 'skewX', { duration: 0.5, ease: 'power3' });
-    let speedTween;
-    let skewReset;
+    // 6. Définition
+    const typed = SplitText.create('.typed', { type: 'chars' }).chars;
+    gsap.timeline({ scrollTrigger: { trigger: '.authors', start: 'top 55%' } })
+      .from('.authors__text', { autoAlpha: 0, duration: 0.6 })
+      .from(typed, { autoAlpha: 0, duration: 0.01, stagger: 0.12 }, '+=0.2');
+    gsap.set('.bracket', { yPercent: -50 });
+    gsap.fromTo('.bracket--left', { xPercent: -70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
+    gsap.fromTo('.bracket--right', { xPercent: 70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
+    const defChars = SplitText.create('.definition__word', { type: 'chars', mask: 'chars' }).chars;
+    gsap.from(defChars, { yPercent: 110, duration: 1.1, stagger: 0.07, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 80%' } });
+    gsap.from('.definition__star', { scale: 0, rotation: -180, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 75%' } });
+    const defWords = SplitText.create('.definition__text', { type: 'words' }).words;
+    gsap.fromTo(defWords, { color: '#c9c6be' }, { color: '#0a0a0b', stagger: 0.05, ease: 'none', scrollTrigger: { trigger: '.definition__text', start: 'top 78%', end: 'bottom 45%', scrub: 1 } });
+    gsap.from(['.definition__phon', '.definition__syn', '.definition__who'], { y: 16, autoAlpha: 0, duration: 0.8, stagger: 0.1, scrollTrigger: { trigger: '.definition__phon', start: 'top 85%' } });
+    marquee($('.tools__track'), 36, 1);
+
+    // 7. Nom géant rempli d'une photo, puis la question
+    const q1 = SplitText.create('.bigword__question', { type: 'words' }).words;
+    gsap.timeline({ scrollTrigger: { trigger: '.bigword', start: 'top top', end: '+=170%', pin: true, scrub: 1 } })
+      .fromTo('.bigword__word', { scale: 1.9 }, { scale: 0.92, duration: 0.5, ease: 'power2.out' }, 0)
+      .fromTo('.bigword__word', { backgroundPosition: '50% 20%' }, { backgroundPosition: '50% 80%', duration: 1, ease: 'none' }, 0)
+      .to('.bigword__word', { opacity: 0.3, duration: 0.2 }, 0.55)
+      .fromTo(q1, { opacity: 0, yPercent: 40, filter: 'blur(8px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.04, duration: 0.25 }, 0.55);
+
+    // 8. La promesse
+    const promiseWords = SplitText.create('.promise__title', { type: 'words' }).words;
+    gsap.from(promiseWords, { yPercent: 50, autoAlpha: 0, duration: 1, stagger: 0.05, ease: 'expo.out', scrollTrigger: { trigger: '.promise', start: 'top 60%' } });
+    gsap.from(['.promise .label', '.promise__next'], { autoAlpha: 0, y: 14, duration: 0.8, stagger: 0.2, scrollTrigger: { trigger: '.promise', start: 'top 60%' } });
+
+    // 9. Projets : chaque diapositive recouvre la précédente
+    if (slides.length > 1) {
+      gsap.set(slides.slice(1), { yPercent: 100 });
+      const pTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.projects', start: 'top top', end: () => `+=${(slides.length - 1) * vh() * 1.1}`, pin: true, scrub: 1, invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const active = Math.min(slides.length - 1, Math.round(self.progress * (slides.length - 1 + 0.3) - 0.15));
+            indexItems.forEach((li, i) => li.classList.toggle('is-active', i === Math.max(0, active)));
+          },
+        },
+      });
+      slides.forEach((slide, i) => {
+        if (!i) return;
+        pTl.to(slide, { yPercent: 0, ease: 'none', duration: 1 }, i - 1)
+          .to($('.slide__body', slides[i - 1]), { yPercent: -10, opacity: 0.25, ease: 'none', duration: 1 }, i - 1)
+          .fromTo($('.slide__body', slide), { yPercent: 14 }, { yPercent: 0, ease: 'none', duration: 1 }, i - 1);
+      });
+      pTl.to({}, { duration: 0.3 });
+    }
+
+    // 10. Aperçu : noms qui défilent dans les deux sens
+    const moreTitle = SplitText.create('.more__title', { type: 'words' }).words;
+    gsap.from(moreTitle, { yPercent: 50, autoAlpha: 0, duration: 1, stagger: 0.05, ease: 'expo.out', scrollTrigger: { trigger: '.more', start: 'top 60%' } });
+    $$('.more__row').forEach((row, i) => marquee(row, 30 + i * 6, i % 2 ? -1 : 1, true));
+    gsap.to('.more__star', { rotation: 120, ease: 'none', scrollTrigger: { trigger: '.more', start: 'top bottom', end: 'bottom top', scrub: true } });
+
+    // 11. Et concrètement ?
+    const q2 = SplitText.create('.how__question', { type: 'words' }).words;
+    gsap.timeline({ scrollTrigger: { trigger: '.how', start: 'top top', end: '+=150%', pin: true, scrub: 1 } })
+      .fromTo('.how__word', { yPercent: 30, scale: 1.15 }, { yPercent: -8, scale: 1, duration: 0.5 }, 0)
+      .fromTo('.how__img', { scale: 1.15 }, { scale: 1, duration: 1, ease: 'none' }, 0)
+      .to('.how__word', { opacity: 0.22, duration: 0.2 }, 0.5)
+      .to('.how__img', { filter: 'brightness(0.25) contrast(1.1)', duration: 0.3 }, 0.5)
+      .fromTo(q2, { opacity: 0, yPercent: 40, filter: 'blur(8px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.04, duration: 0.25 }, 0.55);
+
+    // 12. Méthode
+    const methodWords = SplitText.create('.method__title', { type: 'words' }).words;
+    gsap.from(methodWords, { yPercent: 50, autoAlpha: 0, duration: 1, stagger: 0.05, ease: 'expo.out', scrollTrigger: { trigger: '.method', start: 'top 65%' } });
+    gsap.from(['.method .label', '.method__hint'], { autoAlpha: 0, y: 12, duration: 0.8, stagger: 0.15, scrollTrigger: { trigger: '.method', start: 'top 65%' } });
+    $$('.method__name').forEach((name) => {
+      gsap.fromTo(name, { color: 'rgba(244, 241, 234, 0.14)', x: 40 }, { color: 'rgba(244, 241, 234, 1)', x: 0, ease: 'none', scrollTrigger: { trigger: name, start: 'top 88%', end: 'top 58%', scrub: 1 } });
+    });
+    gsap.from('.method__note', { autoAlpha: 0, y: 16, duration: 0.8, scrollTrigger: { trigger: '.method__note', start: 'top 90%' } });
+
+    // 13. Encore un doute ?
+    const q3 = SplitText.create('.doubt__title', { type: 'words' }).words;
+    gsap.timeline({ scrollTrigger: { trigger: '.doubt', start: 'top top', end: '+=120%', pin: true, scrub: 1 } })
+      .fromTo('.doubt__img', { scale: 1.2 }, { scale: 1, duration: 1, ease: 'none' }, 0)
+      .fromTo('.doubt__stage', { '--dark': 0.08 }, { '--dark': 0.62, duration: 0.6 }, 0.2)
+      .fromTo(q3, { opacity: 0, yPercent: 40, filter: 'blur(8px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.05, duration: 0.3 }, 0.25);
+
+    // 14. Confiance : la liste de noms défile
+    const win = $('.clients__window');
+    const list = $('.clients__list');
+    gsap.fromTo(list, { y: () => win.offsetHeight * 0.5 }, {
+      y: () => -(list.offsetHeight - win.offsetHeight * 0.5), ease: 'none',
+      scrollTrigger: { trigger: '.clients', start: 'top bottom', end: 'bottom top', scrub: 1, invalidateOnRefresh: true },
+    });
+    gsap.fromTo('.clients__closer mark', { backgroundSize: '0% 100%' }, { backgroundSize: '100% 100%', duration: 1.1, ease: 'expo.inOut', scrollTrigger: { trigger: '.clients__closer', start: 'top 82%' } });
+    gsap.from('.clients__closer', { y: 30, autoAlpha: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.clients__closer', start: 'top 88%' } });
+
+    // 15. Journal
+    gsap.set('.journal__list li', { y: 30, autoAlpha: 0 });
+    ScrollTrigger.batch('.journal__list li', { start: 'top 90%', once: true, onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: 0.9, stagger: 0.1, ease: 'power3.out' }) });
+
+    // 16. Témoignage
+    gsap.fromTo('.testimonial__img', { scale: 1.2 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.testimonial', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.fromTo('.testimonial__word', { yPercent: 25 }, { yPercent: -10, ease: 'none', scrollTrigger: { trigger: '.testimonial', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.from(['.testimonial__text > *', '.testimonial__cta'], { y: 30, autoAlpha: 0, duration: 1, stagger: 0.1, ease: 'expo.out', scrollTrigger: { trigger: '.testimonial', start: 'top 55%' } });
+
+    // 17. Pied de page
+    revealLines('.footer__title', '.footer');
+    const footChars = SplitText.create('.footer__logo', { type: 'chars', mask: 'chars' }).chars;
+    gsap.from(footChars, { yPercent: 110, duration: 1.1, stagger: 0.06, ease: 'expo.out', scrollTrigger: { trigger: '.footer__logo', start: 'top 92%' } });
+  }
+
+  // Fait monter les lignes d'un texte depuis un masque
+  function revealLines(selector, trigger) {
+    const lines = SplitText.create(selector, { type: 'lines', mask: 'lines' }).lines;
+    gsap.from(lines, { yPercent: 105, duration: 1.1, stagger: 0.08, ease: 'expo.out', scrollTrigger: { trigger, start: 'top 78%' } });
+  }
+
+  // Bandeau qui défile en continu (accélère avec la vitesse du scroll si "reactive")
+  function marquee(track, duration, direction, reactive) {
+    const tween = gsap.fromTo(track, { xPercent: direction > 0 ? 0 : -50 }, { xPercent: direction > 0 ? -50 : 0, duration, ease: 'none', repeat: -1 });
+    if (!reactive) return;
+    let slow;
     ScrollTrigger.create({
-      trigger: '.marquee', start: 'top bottom', end: 'bottom top',
+      trigger: track, start: 'top bottom', end: 'bottom top',
       onUpdate(self) {
-        const v = self.getVelocity();
-        loop.timeScale(self.direction * (1 + Math.min(Math.abs(v) / 300, 6)));
-        if (speedTween) speedTween.kill();
-        speedTween = gsap.to(loop, { timeScale: self.direction, duration: 1.2, ease: 'power2.out' });
-        skewTo(gsap.utils.clamp(-10, 10, -v / 300));
-        clearTimeout(skewReset);
-        skewReset = setTimeout(() => skewTo(0), 120);
+        tween.timeScale(1 + Math.min(Math.abs(self.getVelocity()) / 400, 5));
+        if (slow) slow.kill();
+        slow = gsap.to(tween, { timeScale: 1, duration: 1.2, ease: 'power2.out' });
       },
     });
+  }
 
-    // Projets : la section s'ouvre comme un écran qui s'agrandit
-    gsap.fromTo('.projets', { '--it': '14vh', '--is': '5vw', '--ir': '40px' }, {
-      '--it': '0vh', '--is': '0vw', '--ir': '0px', ease: 'none',
-      scrollTrigger: { trigger: '.projets', start: 'top bottom', end: 'top 10%', scrub: true },
-    });
-    revealLines('.projets__title');
-    gsap.from('.projets__side > *', {
-      y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out',
-      scrollTrigger: { trigger: '.projets__head', start: 'top 75%' },
-    });
-    gsap.set(rows, { y: 40, autoAlpha: 0 });
-    ScrollTrigger.batch(rows, {
-      start: 'top 94%', once: true,
-      onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.06, ease: 'power3.out', overwrite: true }),
-    });
+  /* ---------- En-tête : visible après l'accueil, couleur selon la section ---------- */
+  function setHeaderTheme(theme) {
+    header.classList.toggle('is-hidden', theme === 'hidden');
+    header.classList.toggle('is-dark', theme === 'dark');
+  }
 
-    // À propos
-    revealLines('.apropos__title');
-    gsap.from(['.apropos__text p', '.apropos__cols .col'], {
-      y: 30, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out',
-      scrollTrigger: { trigger: '.apropos__intro', start: 'top 70%' },
+  function setupHeader() {
+    setHeaderTheme('hidden');
+    $$('[data-header]').forEach((section) => {
+      if (section.dataset.header === 'auto') return;
+      const trigger = section.parentElement.classList.contains('pin-spacer') ? section.parentElement : section;
+      ScrollTrigger.create({
+        trigger, start: 'top 40px', end: 'bottom 40px',
+        onToggle: (self) => { if (self.isActive) setHeaderTheme(section.dataset.header); },
+      });
     });
-
-    // Contact
-    revealLines('.contact__title');
-    gsap.from(['.contact__mail', '.contact__links li'], {
-      y: 24, autoAlpha: 0, duration: 0.8, stagger: 0.06, ease: 'power3.out',
-      scrollTrigger: { trigger: '.contact__mail', start: 'top 85%' },
-    });
-
-    // Pied de page : le nom remonte lettre par lettre
-    const footerSplit = SplitText.create(footerName, { type: 'chars', mask: 'chars' });
-    gsap.from(footerSplit.chars, {
-      yPercent: 105, duration: 1.2, stagger: 0.06, ease: 'expo.out',
-      scrollTrigger: { trigger: '.footer', start: 'top 70%' },
-    });
-
-    // En-tête : se cache quand on descend, revient quand on remonte
-    const header = $('.header');
+    const reelSpacer = $('.reel').parentElement;
+    ScrollTrigger.create({ trigger: reelSpacer, start: 'top 40px', end: 'bottom 40px', onToggle: (self) => { if (self.isActive) setHeaderTheme('light'); } });
     ScrollTrigger.create({
-      start: 120, end: 'max',
-      onUpdate: (self) => {
-        if (menuOpen) return;
-        gsap.to(header, { yPercent: self.direction === 1 ? -120 : 0, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
-      },
-      onLeaveBack: () => gsap.to(header, { yPercent: 0, duration: 0.5, ease: 'power3.out', overwrite: 'auto' }),
-    });
-
-    return heroSplit;
-  }
-
-  // Fait monter les lignes d'un titre depuis un masque
-  function revealLines(selector) {
-    const split = SplitText.create(selector, { type: 'lines', mask: 'lines' });
-    gsap.from(split.lines, {
-      yPercent: 105, duration: 1.1, stagger: 0.1, ease: 'expo.out',
-      scrollTrigger: { trigger: selector, start: 'top 82%' },
+      trigger: '.lead', start: 'top 60%',
+      onEnter: () => header.classList.add('is-compact'),
+      onLeaveBack: () => header.classList.remove('is-compact'),
     });
   }
 
-  /* ---------- Curseur + aperçu des projets ---------- */
+  /* ---------- Curseur personnalisé ---------- */
   function setupCursor() {
     root.classList.add('has-cursor');
     const cursor = $('.cursor');
-    const preview = $('.preview');
-    const previewImg = $('.preview__img');
-
-    gsap.set(cursor, { x: -100, y: -100 });
-    gsap.set(preview, { xPercent: -50, yPercent: -50, scale: 0.85 });
-    const cx = gsap.quickTo(cursor, 'x', { duration: 0.18, ease: 'power3' });
-    const cy = gsap.quickTo(cursor, 'y', { duration: 0.18, ease: 'power3' });
-    const px = gsap.quickTo(preview, 'x', { duration: 0.6, ease: 'power3' });
-    const py = gsap.quickTo(preview, 'y', { duration: 0.6, ease: 'power3' });
-    const pr = gsap.quickTo(preview, 'rotation', { duration: 0.8, ease: 'power3' });
-    let lastX = 0;
-    let tiltReset;
-
-    window.addEventListener('pointermove', (e) => {
-      cx(e.clientX); cy(e.clientY);
-      px(e.clientX); py(e.clientY);
-      pr(gsap.utils.clamp(-12, 12, (e.clientX - lastX) * 0.5));
-      lastX = e.clientX;
-      clearTimeout(tiltReset);
-      tiltReset = setTimeout(() => pr(0), 100);
-    }, { passive: true });
-
-    // Le curseur grossit sur les liens et boutons
+    gsap.set(cursor, { x: window.innerWidth / 2, y: window.innerHeight - 80 });
+    const xTo = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3' });
+    const yTo = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3' });
+    window.addEventListener('pointermove', (e) => { xTo(e.clientX); yTo(e.clientY); }, { passive: true });
     document.addEventListener('pointerover', (e) => {
-      const hit = e.target.closest('a, button');
-      cursor.classList.toggle('is-link', !!hit && !hit.classList.contains('row__btn'));
+      cursor.classList.toggle('is-link', !!e.target.closest('a, button, input, .menu__col'));
     });
-
-    // Aperçu de l'affiche au survol d'une ligne
-    rows.forEach((row) => {
-      const btn = $('.row__btn', row);
-      btn.addEventListener('pointerenter', () => {
-        const p = projets[Number(btn.dataset.index)];
-        if (previewImg.getAttribute('src') !== p.image) previewImg.src = p.image;
-        cursor.style.setProperty('--c', p.encre);
-        cursor.style.setProperty('--ci', p.couleur);
-        cursor.classList.add('is-view');
-        gsap.to(preview, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
-      });
-    });
-
-    hidePreview = () => {
-      cursor.classList.remove('is-view');
-      gsap.to(preview, { autoAlpha: 0, scale: 0.85, duration: 0.4, ease: 'power3.out', overwrite: 'auto' });
-    };
-    list.addEventListener('pointerleave', hidePreview);
   }
 })();
