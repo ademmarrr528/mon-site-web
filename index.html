@@ -1,41 +1,243 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>premiere exercice</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Adem · Graphiste &amp; direction artistique</title>
+  <meta name="description" content="Portfolio d'Adem, graphiste en BUT MMI : affiches, print, bannières web et concepts de sites. En recherche de stage en agence de communication.">
+
+  <!-- Polices : Anton (titres), Bodoni Moda italique (accents), Archivo (texte), Geist Mono (étiquettes) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600&family=Bodoni+Moda:ital,opsz,wght@1,6..96,400;1,6..96,500&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Active l'écran de chargement (retiré automatiquement après 6 s si un script ne charge pas) -->
+  <script>
+    document.documentElement.classList.add('js', 'is-loading');
+    setTimeout(function () { document.documentElement.classList.remove('is-loading'); }, 6000);
+  </script>
 </head>
-<style>
-    .container {
-
-        display: grid;
-        grid-template-columns: 2fr 2fr 2fr ;
-        grid-template-rows: 1fr 1fr 1fr;
-
-    }
-
-    article {
-        border: solid blue;
-        background-color: grey;
-        padding: 10px;
-    }
-
-    .item1 {
-        grid-column: 1;
-        grid-row: 1/3;
-    }
-   
-</style>
 <body>
-    <div class="container">
-        <article class="item1">1</article>
-        <article class="item2">2</article>
-        <article class="item3">3</article>
-        <article class="item4">4</article>
-        <article class="item5">5</article>
-        <article class="item6">6</article>
-        <article class="item7">7</article>
-        <article class="item8">8</article>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <!-- ============ ÉCRAN DE CHARGEMENT ============ -->
+  <div class="loader" aria-hidden="true">
+    <p class="loader__label mono">Portfolio — 2026</p>
+    <p class="loader__label loader__label--right mono">Graphiste &amp; DA</p>
+    <div class="loader__count"><span class="loader__num">000</span></div>
+  </div>
+
+  <!-- Curseur personnalisé + aperçu des projets au survol (souris uniquement) -->
+  <div class="cursor" aria-hidden="true"><span class="cursor__label">Voir</span></div>
+  <div class="preview" aria-hidden="true"><img class="preview__img" src="" alt=""></div>
+
+  <!-- ============ EN-TÊTE ============ -->
+  <header class="header">
+    <a class="header__logo" href="#top">Adem<span>.</span></a>
+    <p class="header__status mono"><span class="pulse"></span>Recherche un stage · 2027</p>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu">
+      <span class="menu-btn__text">Menu</span>
+      <span class="menu-btn__icon"><i></i><i></i></span>
+    </button>
+  </header>
+
+  <!-- ============ MENU PLEIN ÉCRAN ============ -->
+  <nav class="menu" id="menu" aria-label="Menu principal" hidden>
+    <ul class="menu__list">
+      <li><a class="menu__link" href="#projets"><span class="menu__big">Projets</span><span class="menu__sub">Affiches, print, web.</span></a></li>
+      <li><a class="menu__link" href="#apropos"><span class="menu__big">À propos</span><span class="menu__sub">Le parcours, les terrains de jeu.</span></a></li>
+      <li><a class="menu__link" href="#contact"><span class="menu__big">Contact</span><span class="menu__sub">Un stage à pourvoir ?</span></a></li>
+    </ul>
+    <p class="menu__foot mono">
+      <span class="menu__mail">prenom.nom@email.fr</span>
+      <span>Instagram · LinkedIn · Behance</span>
+    </p>
+  </nav>
+
+  <main id="contenu">
+
+    <!-- ============ ACCUEIL ============ -->
+    <section class="hero" id="top" aria-label="Accueil">
+      <div class="hero__stage">
+        <!-- Anneau 3D : les affiches (ajoutées par js/main.js) tournent autour du nom -->
+        <div class="ring-scene">
+          <div class="ring">
+            <h1 class="hero__title"><span class="hero__fade"><span class="hero__name">Adem</span></span></h1>
+          </div>
+        </div>
+
+        <div class="hero__bottom">
+          <p class="hero__role"><em>Graphiste</em> &amp; direction artistique</p>
+          <p class="hero__meta mono">( BUT MMI — Portfolio 2026 )</p>
+        </div>
+
+        <a class="scroll-badge" href="#manifeste" aria-label="Descendre vers la présentation">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs><path id="cercle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
+            <text><textPath href="#cercle" textLength="286" lengthAdjust="spacing">Défiler · Défiler · Défiler · </textPath></text>
+          </svg>
+          <span class="scroll-badge__arrow">↓</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ MANIFESTE ============ -->
+    <section class="section manifeste" id="manifeste">
+      <p class="label mono">( Manifeste )</p>
+      <h2 class="manifeste__text">Une affiche a trois secondes pour convaincre. <em>Je passe des heures à les gagner.</em></h2>
+      <div class="manifeste__cols">
+        <p>Graphiste en BUT MMI, avec une première expérience en direction artistique dans une agence de communication parisienne. Je conçois des affiches, des campagnes print et des bannières web. L'idée d'abord, la forme ensuite.</p>
+        <p>Mes terrains de jeu : le sport, la musique et le jeu vidéo. C'est là que je trouve l'énergie de mes images.</p>
+      </div>
+    </section>
+
+    <!-- Bandeau défilant (décoratif) -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Affiches</span><span class="marquee__star">✦</span>
+        <span class="is-outline">Print</span><span class="marquee__star">✦</span>
+        <span>Bannières web</span><span class="marquee__star">✦</span>
+        <span class="is-outline">Concepts web</span><span class="marquee__star">✦</span>
+        <span>Direction artistique</span><span class="marquee__star">✦</span>
+        <span>Affiches</span><span class="marquee__star">✦</span>
+        <span class="is-outline">Print</span><span class="marquee__star">✦</span>
+        <span>Bannières web</span><span class="marquee__star">✦</span>
+        <span class="is-outline">Concepts web</span><span class="marquee__star">✦</span>
+        <span>Direction artistique</span><span class="marquee__star">✦</span>
+      </div>
     </div>
+
+    <!-- ============ PROJETS ============ -->
+    <section class="section projets" id="projets">
+      <div class="projets__head">
+        <h2 class="projets__title">Projets<sup class="projets__count mono">(00)</sup></h2>
+        <div class="projets__side">
+          <p class="projets__intro">Affiches, campagnes print, bannières et concepts web. Survole une ligne pour voir le visuel, clique pour l'ouvrir en grand.</p>
+          <div class="filters" role="group" aria-label="Filtrer les projets">
+            <button class="filter" type="button" data-filter="tout" aria-pressed="true">Tout <span class="filter__n"></span></button>
+            <button class="filter" type="button" data-filter="affiche" aria-pressed="false">Affiches <span class="filter__n"></span></button>
+            <button class="filter" type="button" data-filter="print" aria-pressed="false">Print &amp; bannières <span class="filter__n"></span></button>
+            <button class="filter" type="button" data-filter="web" aria-pressed="false">Concepts web <span class="filter__n"></span></button>
+          </div>
+          <p class="projets__note mono">Visuels provisoires, en attendant les vrais projets</p>
+        </div>
+      </div>
+
+      <!-- Liste remplie par js/main.js à partir de js/projets.js -->
+      <ol class="list"></ol>
+    </section>
+
+    <!-- ============ À PROPOS ============ -->
+    <section class="section apropos" id="apropos">
+      <p class="label mono">( À propos )</p>
+      <div class="apropos__intro">
+        <h2 class="apropos__title">Des idées qui frappent, <em>des formes qui restent.</em></h2>
+        <div class="apropos__text">
+          <p>Je suis en troisième année de BUT MMI (Métiers du multimédia et de l'internet). Ce qui me plaît, c'est la communication créative : trouver l'idée, puis lui donner une forme qui se remarque, en affiche, en campagne ou en bannière.</p>
+          <p>Pendant mon stage dans une agence de communication à Paris, j'ai travaillé aux côtés de la direction artistique sur des projets print et des déclinaisons web pour de vrais clients. Pour mon prochain stage, je cherche une agence créative où continuer dans cette voie. Le motion design, l'UX et l'audiovisuel m'intéressent aussi.</p>
+        </div>
+      </div>
+
+      <div class="apropos__cols">
+        <div class="col">
+          <h3 class="col__title mono">Ce que je fais</h3>
+          <ul class="col__list">
+            <li>Direction artistique</li>
+            <li>Affiches &amp; print</li>
+            <li>Bannières &amp; déclinaisons web</li>
+            <li>Concepts de sites &amp; UI</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3 class="col__title mono">Parcours</h3>
+          <ul class="col__list col__list--dates">
+            <li><span class="mono">2026</span>Stage en direction artistique, agence de communication, Paris</li>
+            <li><span class="mono">2024 → 2027</span>BUT MMI, IUT de [ville]</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3 class="col__title mono">Outils</h3>
+          <ul class="col__list">
+            <li>Photoshop</li>
+            <li>Illustrator</li>
+            <li>InDesign</li>
+            <li>Figma</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3 class="col__title mono">En ce moment <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></h3>
+          <ul class="col__list">
+            <li>F1 &amp; football</li>
+            <li>Rap FR, rap US, R&amp;B</li>
+            <li>Rocket League, Elden Ring</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="section contact" id="contact">
+      <p class="label mono">( Contact )</p>
+      <h2 class="contact__title">Un stage <em>à pourvoir ?</em></h2>
+      <div class="contact__mail">
+        <a class="contact__address" id="email" href="mailto:prenom.nom@email.fr">prenom.nom@email.fr</a>
+        <button class="copy-btn mono" type="button" data-copy="prenom.nom@email.fr">Copier l'adresse</button>
+      </div>
+      <ul class="contact__links">
+        <li><a href="#contact" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span></a></li>
+        <li><a href="#contact" target="_blank" rel="noopener">Instagram <span aria-hidden="true">↗</span></a></li>
+        <li><a href="#contact" target="_blank" rel="noopener">Behance <span aria-hidden="true">↗</span></a></li>
+        <li><a href="#contact" target="_blank" rel="noopener">CV (PDF) <span aria-hidden="true">↗</span></a></li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- ============ PIED DE PAGE ============ -->
+  <footer class="footer">
+    <p class="footer__big" aria-hidden="true"><span class="footer__name">Adem</span></p>
+    <div class="footer__bar mono">
+      <span>© 2026 Adem</span>
+      <span>Design &amp; code : Adem</span>
+      <a href="#top">Haut de page ↑</a>
+    </div>
+  </footer>
+
+  <!-- Visionneuse plein écran des projets -->
+  <dialog class="viewer" id="viewer" aria-labelledby="viewer-title">
+    <div class="viewer__inner">
+      <figure class="viewer__media"><img class="viewer__img" src="" alt=""></figure>
+      <div class="viewer__info">
+        <p class="viewer__meta mono"></p>
+        <h3 class="viewer__title" id="viewer-title"></h3>
+        <p class="viewer__desc"></p>
+        <p class="viewer__soon mono">Étude de cas complète : bientôt</p>
+        <div class="viewer__nav">
+          <button class="viewer__btn mono" type="button" data-step="-1">← Précédent</button>
+          <button class="viewer__btn mono" type="button" data-step="1">Suivant →</button>
+        </div>
+      </div>
+      <button class="viewer__close mono" type="button">Fermer ✕</button>
+    </div>
+  </dialog>
+
+  <!-- Essai de couleur d'accent : TEMPORAIRE, à retirer une fois la couleur choisie -->
+  <div class="swatches" role="group" aria-label="Essayer une couleur d'accent">
+    <span class="swatches__label mono">Couleur</span>
+    <button class="swatch" type="button" data-accent="nb" aria-pressed="true" title="Noir &amp; blanc"><span class="sr-only">Noir et blanc</span></button>
+    <button class="swatch" type="button" data-accent="rouge" aria-pressed="false" title="Rouge"><span class="sr-only">Rouge</span></button>
+    <button class="swatch" type="button" data-accent="violet" aria-pressed="false" title="Violet"><span class="sr-only">Violet</span></button>
+    <button class="swatch" type="button" data-accent="bleu" aria-pressed="false" title="Bleu"><span class="sr-only">Bleu</span></button>
+  </div>
+
+  <!-- Bibliothèques d'animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.2/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
+
+  <!-- Le site -->
+  <script src="js/projets.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
