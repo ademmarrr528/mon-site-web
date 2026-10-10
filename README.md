@@ -4,7 +4,9 @@ Portfolio de graphiste et direction artistique (BUT MMI), pensé pour décrocher
 
 **Inspirations :**
 - structure et animations : [ownitt.fr](https://ownitt.fr/) ;
-- couleurs et ambiance : le [lookbook Quechua SS25](https://quechua-lookbook.com/ss25/fr/) (papier crème avec grain, charbon, vert sauge, rouille, coins arrondis, annotations manuscrites) ;
+- couleurs, menu et ambiance : le [lookbook Quechua SS25](https://quechua-lookbook.com/ss25/fr/) (papier crème avec grain, charbon, vert sauge, rouille, coins arrondis, annotations manuscrites, menu en pastille de verre dépoli) ;
+- élément 3D après l'accueil : l'esprit de [landonorris.com](https://landonorris.com/) ;
+- galerie « Et ce n'est qu'un aperçu » : [duda.works](https://www.duda.works/) ;
 - univers : sport (foot, F1), musique (rap, R&B), jeux vidéo, affiche et pub.
 
 **Identité :** le symbole est un *macaron* (le badge à bords festonnés des stickers « Nouveau ! » en pub). Il sert de logo avec « AM » découpé dedans, et il reprend les animations de l'accueil, du manifeste et du pied de page. Le nom complet « Adem Marine » n'apparaît qu'à l'accueil et dans le pied de page.
@@ -36,26 +38,26 @@ archives/           → mon premier exercice de grille CSS
 | Section | Ce qui se passe |
 | --- | --- |
 | Écran de chargement | Pile de photos qui s'empilent, compteur en %, annotations manuscrites |
-| Accueil | Nom, macaron, disciplines qui défilent ; au scroll le macaron grossit en tournant jusqu'à remplir l'écran de vert |
-| Image + accroche | Grande photo, phrase d'accroche, mot qui change en bas |
-| Paragraphe | Présentation, les lignes montent une à une |
-| Showreel | Le cadre arrondi grandit au scroll jusqu'à prendre tout l'écran |
+| Accueil | Le nom s'écrit au trait puis se remplit ; macaron, disciplines qui défilent |
+| Sphère | Au scroll, le macaron grossit jusqu'à remplir l'écran de vert, puis une sphère 3D d'affiches apparaît et tourne (souris + scroll) |
+| Parcours | Frise chronologique en défilement horizontal : chaque niveau se « débloque » quand il arrive à l'écran |
+| Sélection | Le cadre arrondi grandit au scroll et fait défiler les affiches jusqu'à prendre tout l'écran |
 | Manifeste | Fond vert sauge, trois phrases qui s'allument mot par mot, grand macaron qui tourne |
 | Définition | « Créa », parenthèses qui se referment, bandeau des outils |
-| PLAY | Le mot rempli d'une photo de concert, puis une question |
+| IMPACT | Le mot rempli d'une photo de bureau de graphiste, puis une question |
 | Projets | Une diapositive par projet, chacune recouvre la précédente |
-| Aperçu | Noms qui défilent dans les deux sens |
-| Et concrètement ? | « FOCUS » sur photo, question |
+| Et ce n'est qu'un aperçu | Espace sombre rempli d'affiches qu'on explore en faisant glisser (souris ou doigt), clic pour agrandir |
 | Méthode | Cinq terrains ; au survol, le mot défile et les détails apparaissent |
 | Encore un doute ? | Photo qui s'assombrit, question |
-| Confiance, Journal, Témoignage | Liste qui défile, articles, appel à l'action |
-| Pied de page | Contact, téléphone, réseaux, liens |
+| Contact | Formulaire, sticker « Dispo stage 2027 », téléphone, réseaux, liens |
+
+Le menu (en haut à droite) affiche le nom de la section en cours et se déplie au survol, comme sur le lookbook Quechua.
 
 ## Ajouter ou modifier un projet
 
 1. Mets ton visuel dans `assets/projets/` (format portrait 2:3 idéal, en `.webp` ou `.jpg`).
 2. Ouvre `js/projets.js`, copie un bloc `{ ... }` et change les infos.
-3. Enregistre : les diapositives et l'index à droite se mettent à jour tout seuls.
+3. Enregistre : les diapositives, la sélection, la sphère et la galerie se mettent à jour toutes seules.
 
 Les diapositives alternent crème et gris pierre ; la `couleur` du projet sert de fond au cadre du visuel.
 
@@ -68,7 +70,7 @@ Les diapositives alternent crème et gris pierre ; la `couleur` du projet sert d
 | SplitText (plugin GSAP) | Découpe les textes en lettres, mots ou lignes pour les animer |
 | [Lenis](https://lenis.darkroom.engineering/) | Défilement fluide |
 
-Polices (Google Fonts, gratuites) : **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (PLAY, FOCUS, TEAM) et **Covered By Your Grace** pour les annotations manuscrites.
+Polices (Google Fonts, gratuites) : **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (IMPACT, années de la frise) et **Covered By Your Grace** pour les annotations manuscrites.
 
 Couleurs : crème `#f4f2ec`, charbon `#252422`, gris pierre `#dad6cd`, vert sauge `#546a55` et une seule couleur d'accent, la rouille `#c4512f`, utilisée par petites touches.
 
@@ -78,6 +80,7 @@ Les photos de `assets/img/` viennent de [Lorem Picsum](https://picsum.photos/), 
 
 ## Reste à faire
 
+- [ ] Vérifier les dates et les textes de la frise (bac, BUT, stage)
 - [ ] Réécrire les textes provisoires avec tes mots
 - [ ] Remplacer les affiches d'exemple par tes vrais projets
 - [ ] Remplacer les photos d'ambiance (idéalement par tes propres photos ou visuels)
