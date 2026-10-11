@@ -3,8 +3,9 @@
    Pas de fichier audio : nappes douces, basse ronde et petites
    notes avec écho, sur une suite d'accords « chill » :
    Fa maj9 → Mi m7 → Ré m9 → La m9 (72 BPM, 2 mesures par accord).
-   Coupée par défaut : elle démarre seulement quand on clique sur
-   le bouton « Son » (les navigateurs l'imposent).
+   Elle démarre avec l'animation du nom, au clic sur « Entrer »
+   (les navigateurs interdisent le son sans un clic du visiteur).
+   Le bouton « Son » permet ensuite de la couper ou la relancer.
    ========================================================= */
 (function () {
   'use strict';
@@ -182,7 +183,7 @@
     }
   }
 
-  function start() {
+  function start(fade = 2.5) {
     if (!ctx) { ctx = new AudioCtx(); engine = createEngine(ctx); }
     ctx.resume();
     nextTime = ctx.currentTime + 0.1;
@@ -192,7 +193,7 @@
     const g = engine.master.gain;
     g.cancelScheduledValues(ctx.currentTime);
     g.setValueAtTime(g.value, ctx.currentTime);
-    g.linearRampToValueAtTime(VOLUME, ctx.currentTime + 2.5);
+    g.linearRampToValueAtTime(VOLUME, ctx.currentTime + fade);
   }
 
   function stop() {
@@ -205,14 +206,17 @@
     setTimeout(() => { if (!on) ctx.suspend(); }, 900);
   }
 
-  function setOn(value) {
+  function setOn(value, fade) {
     on = value;
     btn.classList.toggle('is-on', on);
     btn.setAttribute('aria-pressed', String(on));
     btn.setAttribute('aria-label', on ? "Couper la musique d'ambiance" : "Activer la musique d'ambiance");
     document.documentElement.classList.add('sound-touched');
-    if (on) start(); else stop();
+    if (on) start(fade); else stop();
   }
+
+  // Utilisé par l'écran d'entrée (js/main.js) : lance la musique en même temps que le nom
+  window.AmbientSound.enable = (fade = 1.6) => { if (!on) setOn(true, fade); };
 
   btn.addEventListener('click', () => setOn(!on));
   document.addEventListener('visibilitychange', () => {

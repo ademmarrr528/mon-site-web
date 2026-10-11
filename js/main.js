@@ -349,6 +349,7 @@
      2. ANIMATIONS
      ======================================================= */
 
+  window.__siteReady = true; // l'écran de chargement est géré ici (voir le filet de sécurité dans index.html)
   gsap.registerPlugin(ScrollTrigger, SplitText);
   ScrollTrigger.config({ ignoreMobileResize: true });
 
@@ -386,16 +387,28 @@
     const hero = heroIntro();
     photos.forEach((img) => gsap.set(img, { rotation: gsap.utils.random(-9, 9), scale: 0.9, y: 20 }));
 
-    const tl = gsap.timeline({ onComplete: finishLoader });
-    tl.from('.loader__note', { autoAlpha: 0, y: 10, duration: 0.6, stagger: 0.15 }, 0.1)
+    // 1re partie : la pile de photos se forme, le compteur monte jusqu'à 100 %
+    const intro = gsap.timeline();
+    intro.from('.loader__note', { autoAlpha: 0, y: 10, duration: 0.6, stagger: 0.15 }, 0.1)
       .to(photos, { opacity: 1, scale: 1, y: 0, duration: 0.35, stagger: 0.12, ease: 'back.out(1.6)' }, 0)
       .to(counter, { v: 100, duration: 0.12 * photos.length + 0.25, ease: 'none', onUpdate: () => { num.textContent = Math.round(counter.v); } }, 0)
-      .to(['.loader__note', '.loader__count', '.loader__skip'], { autoAlpha: 0, duration: 0.3 }, '+=0.25')
-      .to(photos, { yPercent: -40, opacity: 0, rotation: '+=8', duration: 0.6, stagger: { each: 0.025, from: 'end' }, ease: 'power3.in' }, '<')
-      .to('.loader', { clipPath: 'inset(0% 0% 100% 0%)', duration: 1, ease: 'expo.inOut' }, '-=0.25')
-      .add(hero.play(), '-=0.45');
+      .to(['.loader__count', '.loader__skip'], { autoAlpha: 0, duration: 0.3 }, '+=0.15')
+      .fromTo('.loader__gate', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'expo.out' }, '<0.1')
+      .from('.loader__gate-note', { autoAlpha: 0, rotation: 6, duration: 0.6, ease: 'back.out(2)' }, '<0.3');
 
-    $('.loader__skip').addEventListener('click', () => tl.progress(1));
+    // 2e partie (au clic sur « Entrer ») : la musique et l'animation du nom démarrent ensemble
+    function enter(withSound) {
+      if (withSound && window.AmbientSound && window.AmbientSound.enable) window.AmbientSound.enable();
+      intro.progress(1).kill();
+      gsap.timeline({ onComplete: finishLoader })
+        .to(['.loader__gate', '.loader__note'], { autoAlpha: 0, duration: 0.3 })
+        .to(photos, { yPercent: -40, opacity: 0, rotation: '+=8', duration: 0.6, stagger: { each: 0.025, from: 'end' }, ease: 'power3.in' }, '<')
+        .to('.loader', { clipPath: 'inset(0% 0% 100% 0%)', duration: 1, ease: 'expo.inOut' }, '-=0.25')
+        .add(hero.play(), '-=0.45');
+    }
+    $('.loader__enter').addEventListener('click', () => enter(true), { once: true });
+    $('.loader__mute').addEventListener('click', () => enter(false), { once: true });
+    $('.loader__skip').addEventListener('click', () => intro.progress(1));
   }
 
   function finishLoader() {
@@ -469,8 +482,8 @@
     const worldTitle = SplitText.create('.world__title', { type: 'words' }).words;
     gsap.timeline({
       scrollTrigger: {
-        trigger: '.hero', start: 'top top', end: '+=320%', pin: true, scrub: 1, invalidateOnRefresh: true,
-        onUpdate: (self) => { world.active = self.progress > 0.3 && self.progress < 0.995; },
+        trigger: '.hero', start: 'top top', end: '+=520%', pin: true, scrub: 1, invalidateOnRefresh: true,
+        onUpdate: (self) => { world.active = self.progress > 0.2 && self.progress < 0.997; },
         onLeave: () => { world.active = false; },
       },
     })
@@ -481,11 +494,11 @@
       .set(badgeWrap, { autoAlpha: 0 }, 1)
       .set('.world', { autoAlpha: 1 }, 0.98)
       .fromTo('.world__scene', { scale: 0.15, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'power3.out' }, 1)
-      .fromTo(world, { scroll: 0 }, { scroll: 300, duration: 2.1, ease: 'none' }, 1)
+      .fromTo(world, { scroll: 0 }, { scroll: 560, duration: 3.9, ease: 'none' }, 1)
       .fromTo(worldTitle, { opacity: 0, yPercent: 60 }, { opacity: 1, yPercent: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' }, 1.25)
       .fromTo('.world__note', { opacity: 0, rotation: 16 }, { opacity: 1, rotation: 7, duration: 0.3, ease: 'back.out(2)' }, 1.5)
-      .to('.world__scene', { scale: 1.7, opacity: 0, duration: 0.45, ease: 'power2.in' }, 2.65)
-      .to(['.world__title', '.world__note'], { y: -50, opacity: 0, duration: 0.35, ease: 'power2.in' }, 2.7);
+      .to('.world__scene', { scale: 1.7, opacity: 0, duration: 0.45, ease: 'power2.in' }, 4.45)
+      .to(['.world__title', '.world__note'], { y: -50, opacity: 0, duration: 0.35, ease: 'power2.in' }, 4.5);
 
     // 2. Parcours : défilement horizontal, les niveaux se débloquent un à un
     const track = $('.journey__track');
@@ -512,11 +525,12 @@
     revealLines('.journey__title', '.journey');
     gsap.from(['.journey__intro .label', '.journey__sign', '.journey__hint'], { y: 20, autoAlpha: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.journey', start: 'top 60%' } });
 
-    // 3. Sélection : le cadre grandit, le fond passe du crème au gris pierre, puis les affiches prennent tout l'écran
+    // 3. Sélection : le cadre grandit, le fond passe du crème au gris pierre, les affiches prennent tout l'écran,
+    //    puis un macaron vert grossit par-dessus et remplit l'écran : transition vers le manifeste (vert)
     gsap.timeline({
       scrollTrigger: {
-        trigger: '.reel', start: 'top top', end: '+=230%', pin: true, scrub: 1,
-        onUpdate: (self) => setHeaderTheme(self.progress < 0.62 ? 'dark' : 'light'),
+        trigger: '.reel', start: 'top top', end: '+=300%', pin: true, scrub: 1,
+        onUpdate: (self) => setHeaderTheme(self.progress < 0.5 ? 'dark' : 'light'),
       },
     })
       .to('.reel', { backgroundColor: '#dad6cd', duration: 0.24, ease: 'none' }, 0)
@@ -524,11 +538,13 @@
       .fromTo('.reel__title', { yPercent: 0 }, { yPercent: -70, duration: 0.45, ease: 'power1.inOut' }, 0)
       .to('.reel__kicker', { autoAlpha: 0, y: -30, duration: 0.15 }, 0.3)
       .to('.reel__box', { scale: 1, borderRadius: 0, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.3, ease: 'power2.inOut' }, 0.55)
-      .to({}, { duration: 0.2 });
+      .fromTo('.reel__badge', { scale: 0, rotation: -40 }, { scale: () => Math.hypot(window.innerWidth, window.innerHeight) / 62, rotation: 160, duration: 0.38, ease: 'power3.in' }, 0.88)
+      .to({}, { duration: 0.08 });
 
-    // 4. Manifeste : trois phrases qui s'allument puis laissent la place, le macaron tourne
+    // 4. Manifeste : trois phrases qui s'allument puis laissent la place, le macaron tourne ;
+    //    à la fin, la dernière phrase remonte et le fond passe du vert au noir (transition vers la définition)
     const blocks = $$('.manifesto__block');
-    const mTl = gsap.timeline({ scrollTrigger: { trigger: '.manifesto', start: 'top top', end: '+=430%', pin: true, scrub: 1 } });
+    const mTl = gsap.timeline({ scrollTrigger: { trigger: '.manifesto', start: 'top top', end: '+=540%', pin: true, scrub: 1 } });
     mTl.to('.manifesto__badge', { rotation: 200, scale: 1.12, ease: 'none', duration: blocks.length }, 0);
     blocks.forEach((block, i) => {
       const title = SplitText.create($('.manifesto__title', block), { type: 'words' }).words;
@@ -540,23 +556,45 @@
       mTl.fromTo(accent, { opacity: 0, yPercent: 35 }, { opacity: 1, yPercent: 0, stagger: 0.035, duration: 0.25, ease: 'power2.out' }, i + 0.36);
       if (i < blocks.length - 1) mTl.to(block, { autoAlpha: 0, y: -50, duration: 0.14 }, i + 0.86);
     });
+    const lastBlock = blocks[blocks.length - 1];
+    mTl.to(lastBlock, { y: () => -window.innerHeight * 1.1, duration: 0.7, ease: 'power1.in' }, blocks.length + 0.05)
+      .to('.manifesto__label', { autoAlpha: 0, duration: 0.2 }, blocks.length + 0.05)
+      .to('.manifesto__badge', { opacity: 0, duration: 0.4 }, blocks.length + 0.25)
+      .to('.manifesto', { backgroundColor: '#1d1c1a', duration: 0.45, ease: 'none' }, blocks.length + 0.3)
+      .to({}, { duration: 0.15 });
 
-    // 5. Définition
-    const typed = SplitText.create('.typed', { type: 'chars' }).chars;
-    gsap.timeline({ scrollTrigger: { trigger: '.authors', start: 'top 55%' } })
-      .from('.authors__text', { autoAlpha: 0, duration: 0.6 })
-      .from(typed, { autoAlpha: 0, duration: 0.01, stagger: 0.12 }, '+=0.2');
-    gsap.set('.bracket', { yPercent: -50 });
-    gsap.fromTo('.bracket--left', { xPercent: -70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
-    gsap.fromTo('.bracket--right', { xPercent: 70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
-    const defChars = SplitText.create('.definition__word', { type: 'chars', mask: 'chars' }).chars;
-    gsap.from(defChars, { yPercent: 110, duration: 1.1, stagger: 0.07, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 80%' } });
-    gsap.from('.definition__badge', { scale: 0, rotation: -180, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 75%' } });
-    gsap.from('.definition__note', { autoAlpha: 0, rotation: 6, duration: 0.8, ease: 'back.out(2)', scrollTrigger: { trigger: '.definition__word', start: 'top 70%' } });
-    const defWords = SplitText.create('.definition__text', { type: 'words' }).words;
-    gsap.fromTo(defWords, { color: '#cfcac0' }, { color: '#252422', stagger: 0.05, ease: 'none', scrollTrigger: { trigger: '.definition__text', start: 'top 78%', end: 'bottom 45%', scrub: 1 } });
-    gsap.from(['.definition__phon', '.definition__syn', '.definition__who'], { y: 16, autoAlpha: 0, duration: 0.8, stagger: 0.1, scrollTrigger: { trigger: '.definition__phon', start: 'top 85%' } });
-    gsap.fromTo('.tools__track', { xPercent: 0 }, { xPercent: -50, duration: 36, ease: 'none', repeat: -1 });
+    // 5. Définition (comme ownitt.fr) : écran noir avec seulement « Cette définition a un auteur : moi »,
+    //    puis le fond passe au crème, les crochets arrivent, ADEM monte, la définition s'allume mot par mot
+    const defWords = $$('.def__w');
+    gsap.set('.def__bracket--left', { xPercent: -260, opacity: 0 });
+    gsap.set('.def__bracket--right', { xPercent: 260, opacity: 0 });
+    gsap.set(['.def__kicker', '.def__num', '.def__syn'], { autoAlpha: 0 });
+    gsap.set('.def__word', { yPercent: 108 });
+    gsap.set('.def__badge', { scale: 0, rotation: -180 });
+    gsap.set('.def__pron', { autoAlpha: 0, y: 14 });
+    gsap.set(defWords, { opacity: 0, y: 12 });
+    gsap.set('.def__logos', { autoAlpha: 0, y: 30 });
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: '.definition', start: 'top top', end: '+=220%', pin: true, scrub: 1,
+        onUpdate: (self) => setHeaderTheme(self.progress < 0.22 ? 'light' : 'dark'),
+        onLeaveBack: () => setHeaderTheme('light'),
+      },
+    })
+      .to('.definition', { backgroundColor: '#3d3b37', duration: 0.12, ease: 'none' }, 0)
+      .to('.definition', { backgroundColor: '#c9c5bb', duration: 0.12, ease: 'none' }, 0.12)
+      .to('.definition', { backgroundColor: '#f4f2ec', duration: 0.1, ease: 'none' }, 0.24)
+      .to('.def__authors', { color: 'rgba(37, 36, 34, 0.55)', duration: 0.18, ease: 'none' }, 0.12)
+      .to(['.def__bracket--left', '.def__bracket--right'], { xPercent: 0, opacity: 1, duration: 0.38, ease: 'power3.out' }, 0.08)
+      .to('.def__kicker', { autoAlpha: 1, duration: 0.1 }, 0.22)
+      .to('.def__word', { yPercent: 0, duration: 0.25, ease: 'power3.out' }, 0.25)
+      .to('.def__badge', { scale: 1, rotation: 0, duration: 0.15, ease: 'back.out(1.8)' }, 0.42)
+      .to('.def__pron', { autoAlpha: 1, y: 0, duration: 0.1 }, 0.45)
+      .to('.def__num', { autoAlpha: 1, duration: 0.05 }, 0.5)
+      .to(defWords, { opacity: 1, y: 0, duration: 0.08, stagger: 0.016, ease: 'power2.out' }, 0.52)
+      .to('.def__syn', { autoAlpha: 1, duration: 0.08 }, 0.86)
+      .to('.def__logos', { autoAlpha: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.88)
+      .to({}, { duration: 0.18 });
 
     // 6. Grand mot rempli d'une photo, puis la question
     const q1 = SplitText.create('.bigword__question', { type: 'words' }).words;
