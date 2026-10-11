@@ -28,6 +28,7 @@ index.html          → la structure de la page et tous les textes
 css/style.css       → la mise en forme (couleurs, typos, mise en page)
 js/projets.js       → LA LISTE DE TES PROJETS (les 8 premiers sont affichés)
 js/main.js          → les animations et les interactions
+js/son.js           → la musique d'ambiance (générée en direct)
 assets/projets/     → les visuels des projets (affiches provisoires)
 assets/img/         → les photos d'ambiance (provisoires)
 archives/           → mon premier exercice de grille CSS
@@ -38,7 +39,7 @@ archives/           → mon premier exercice de grille CSS
 | Section | Ce qui se passe |
 | --- | --- |
 | Écran de chargement | Pile de photos qui s'empilent, compteur en %, annotations manuscrites |
-| Accueil | Le nom s'écrit au trait puis se remplit ; macaron, disciplines qui défilent |
+| Accueil | Comme ownitt.fr : le contour de chaque lettre d'« Adem Marine » se dessine l'une après l'autre, les lettres se remplissent, puis « Étudiant en communication » s'écrit et un trait se tire dessous ; macaron, disciplines qui défilent |
 | Sphère | Au scroll, le macaron grossit jusqu'à remplir l'écran de vert, puis une sphère 3D d'affiches apparaît et tourne (souris + scroll) |
 | Parcours | Frise chronologique en défilement horizontal : chaque niveau se « débloque » quand il arrive à l'écran |
 | Sélection | Le cadre arrondi grandit au scroll et fait défiler les affiches jusqu'à prendre tout l'écran |
@@ -70,7 +71,9 @@ Les diapositives alternent crème et gris pierre ; la `couleur` du projet sert d
 | SplitText (plugin GSAP) | Découpe les textes en lettres, mots ou lignes pour les animer |
 | [Lenis](https://lenis.darkroom.engineering/) | Défilement fluide |
 
-Polices (Google Fonts, gratuites) : **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (IMPACT, années de la frise) et **Covered By Your Grace** pour les annotations manuscrites.
+Polices (Google Fonts, gratuites) : **Big Shoulders Display Black** pour le nom de l'accueil (converti en tracés SVG, avec le point du i rendu carré), **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (IMPACT, années de la frise) et **Covered By Your Grace** pour les annotations manuscrites.
+
+**Musique d'ambiance** (`js/son.js`) : il n'y a pas de fichier audio, la musique est générée en direct par le navigateur (Web Audio API) : nappes douces, basse ronde et petites notes avec écho sur une boucle d'accords « chill » à 72 BPM. Elle est coupée par défaut et démarre avec le bouton « Son » en haut à droite (les navigateurs interdisent le son automatique). Pour la remplacer par un vrai morceau libre de droits, il suffira d'ajouter un fichier `.mp3`.
 
 Couleurs : crème `#f4f2ec`, charbon `#252422`, gris pierre `#dad6cd`, vert sauge `#546a55` et une seule couleur d'accent, la rouille `#c4512f`, utilisée par petites touches.
 

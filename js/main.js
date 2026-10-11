@@ -201,10 +201,9 @@
 
   /* ---------- Nom de l'accueil : le cadre SVG épouse le texte ---------- */
   const heroSvg = $('.hero__svg');
-  const heroText = $('.hero__text');
   function fitHeroName() {
     try {
-      const bb = heroText.getBBox();
+      const bb = heroSvg.getBBox();
       if (bb.width) heroSvg.setAttribute('viewBox', `${(bb.x - 4).toFixed(1)} ${(bb.y - 4).toFixed(1)} ${(bb.width + 8).toFixed(1)} ${(bb.height + 8).toFixed(1)}`);
     } catch (err) { /* SVG pas encore affiché */ }
   }
@@ -362,8 +361,12 @@
   }
   viewer.setAttribute('data-lenis-prevent', '');
 
-  // Le nom est caché (contour prêt à être tracé) dès le départ
-  gsap.set(heroText, { fill: 'rgba(37, 36, 34, 0)', strokeWidth: 1.1, strokeDasharray: 900, strokeDashoffset: 900 });
+  // Le nom est caché dès le départ : chaque contour est prêt à être tracé, les lettres sont vides
+  $$('.hl__line, .tl__line, .hero__rule', heroSvg).forEach((path) => {
+    const len = Math.ceil(path.getTotalLength()) + 1;
+    gsap.set(path, { strokeDasharray: len, strokeDashoffset: len, strokeOpacity: 1 });
+  });
+  gsap.set($$('.hl__fill, .tl__fill', heroSvg), { fillOpacity: 0 });
 
   Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), wait(2500)]).then(() => {
     fitWords();
@@ -401,15 +404,32 @@
     ScrollTrigger.refresh();
   }
 
-  // Accueil : le nom s'écrit au trait puis se remplit, le reste apparaît
+  // Accueil, comme ownitt.fr : le contour de chaque lettre se dessine l'une après l'autre,
+  // les lettres se remplissent (gris puis plein), puis « Étudiant en communication »
+  // s'écrit de la même façon et un trait se tire en dessous
   function heroIntro() {
-    return gsap.timeline({ paused: true })
-      .to(heroText, { strokeDashoffset: 0, duration: 2, ease: 'power2.inOut' }, 0)
-      .to(heroText, { fill: 'rgba(37, 36, 34, 1)', duration: 0.6, ease: 'power1.out' }, 1.55)
-      .to(heroText, { strokeWidth: 0, duration: 0.4 }, 2)
-      .from('.hero__badge', { scale: 0, rotation: -120, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 50%' }, 1.1)
-      .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 1.3)
-      .from('.hero__note', { autoAlpha: 0, y: -10, rotation: 14, duration: 0.8, ease: 'back.out(2)' }, 1.9);
+    const letters = $$('.hl', heroSvg);
+    const step = 0.17;
+    const tl = gsap.timeline({ paused: true });
+    letters.forEach((g, i) => {
+      tl.to($$('.hl__line', g), { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut' }, i * step);
+    });
+    const fillAt = letters.length * step + 1.05;
+    const fills = $$('.hl__fill', heroSvg);
+    tl.to(fills, { fillOpacity: 0.3, duration: 0.5, stagger: 0.04, ease: 'power1.out' }, fillAt)
+      .to(fills, { fillOpacity: 1, duration: 0.5, stagger: 0.07, ease: 'power2.out' }, fillAt + 0.6)
+      .to($$('.hl__line', heroSvg), { strokeOpacity: 0, duration: 0.5 }, fillAt + 1.2);
+    const tagAt = fillAt + 0.9;
+    tl.to($$('.tl__line', heroSvg), { strokeDashoffset: 0, duration: 1, stagger: 0.03, ease: 'power2.inOut' }, tagAt)
+      .to($$('.tl__fill', heroSvg), { fillOpacity: 1, duration: 0.45, stagger: 0.03, ease: 'power1.out' }, tagAt + 0.8)
+      .to($$('.tl__line', heroSvg), { strokeOpacity: 0, duration: 0.4 }, tagAt + 1.6)
+      .to('.hero__rule', { strokeDashoffset: 0, duration: 1.1, ease: 'expo.inOut' }, tagAt + 1.1);
+    const restAt = tagAt + 1.5;
+    tl.from('.hero__badge', { scale: 0, rotation: -120, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 50%' }, restAt)
+      .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, restAt + 0.2)
+      .from('.hero__note', { autoAlpha: 0, y: -10, rotation: 14, duration: 0.8, ease: 'back.out(2)' }, restAt + 0.6)
+      .from('.hero__sound-note', { autoAlpha: 0, y: 10, duration: 0.8, ease: 'back.out(2)' }, restAt + 1);
+    return tl;
   }
 
   /* ---------- Sphère d'affiches (CSS 3D) ---------- */
@@ -454,7 +474,7 @@
         onLeave: () => { world.active = false; },
       },
     })
-      .to(['.hero__name', '.hero__note', '.hero__texts'], { y: -70, autoAlpha: 0, duration: 0.25, stagger: 0.03, ease: 'power2.in' }, 0)
+      .to(['.hero__name', '.hero__note', '.hero__sound-note', '.hero__texts'], { y: -70, autoAlpha: 0, duration: 0.25, stagger: 0.03, ease: 'power2.in' }, 0)
       .to(badgeWrap, { y: () => vh() / 2 - (badgeWrap.offsetTop + badgeWrap.offsetHeight / 2), duration: 0.3, ease: 'power2.inOut' }, 0.05)
       .to(badgeWrap, { scale: 70, rotation: 160, duration: 0.65, ease: 'power3.in' }, 0.32)
       .to('.hero', { backgroundColor: '#546a55', duration: 0.2, ease: 'none' }, 0.78)
