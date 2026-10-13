@@ -39,12 +39,12 @@ archives/           → mon premier exercice de grille CSS
 | Section | Ce qui se passe |
 | --- | --- |
 | Écran de chargement | Pile de photos qui s'empilent, compteur en %, annotations manuscrites |
-| Accueil | Comme ownitt.fr : le contour de chaque lettre d'« Adem Marine » se dessine l'une après l'autre, les lettres se remplissent, puis « Étudiant en communication » s'écrit et un trait se tire dessous ; macaron, disciplines qui défilent |
-| Sphère | Au scroll, le macaron grossit jusqu'à remplir l'écran de vert, puis une sphère 3D d'affiches apparaît et tourne (souris + scroll) |
+| Accueil | Comme ownitt.fr, sur fond noir : le contour de chaque lettre d'« Adem Marine » se dessine en blanc l'une après l'autre, les lettres se remplissent, « Étudiant en communication » s'écrit et un trait se tire dessous ; puis un flash et les couleurs s'inversent (fond crème, texte noir) ; macaron, disciplines qui défilent |
+| Sphère | Au scroll, le macaron grossit jusqu'à remplir l'écran de vert, puis une sphère 3D d'affiches apparaît et tourne (scroll + souris) ; on peut aussi l'attraper et la faire tourner en glissant |
 | Parcours | Frise chronologique en défilement horizontal : chaque niveau se « débloque » quand il arrive à l'écran |
 | Sélection | Le cadre arrondi grandit au scroll et fait défiler les affiches jusqu'à prendre tout l'écran |
 | Manifeste | Fond vert sauge, trois phrases qui s'allument mot par mot, grand macaron qui tourne |
-| Définition | « Créa », parenthèses qui se referment, bandeau des outils |
+| Définition | Comme ownitt.fr : grands crochets qui arrivent des côtés, « ADEM » géant et étoile qui tourne, définition en serif qui s'allume mot par mot, « Vu dans » avec des logos qui défilent (provisoires) |
 | IMPACT | Le mot rempli d'une photo de bureau de graphiste, puis une question |
 | Projets | Une diapositive par projet, chacune recouvre la précédente |
 | Et ce n'est qu'un aperçu | Espace sombre rempli d'affiches qu'on explore en faisant glisser (souris ou doigt), clic pour agrandir |
@@ -71,7 +71,7 @@ Les diapositives alternent crème et gris pierre ; la `couleur` du projet sert d
 | SplitText (plugin GSAP) | Découpe les textes en lettres, mots ou lignes pour les animer |
 | [Lenis](https://lenis.darkroom.engineering/) | Défilement fluide |
 
-Polices (Google Fonts, gratuites) : **Big Shoulders Display Black** pour le nom de l'accueil (converti en tracés SVG, avec le point du i rendu carré), **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (IMPACT, années de la frise) et **Covered By Your Grace** pour les annotations manuscrites.
+Polices (Google Fonts, gratuites) : **Big Shoulders Display Black** pour le nom de l'accueil (converti en tracés SVG, avec le point du i rendu carré) et « ADEM » de la définition, **Instrument Serif** pour le texte de la définition, **Figtree** pour les textes, **Instrument Sans** condensée pour les grands mots (IMPACT, années de la frise) et **Covered By Your Grace** pour les annotations manuscrites.
 
 **Musique d'ambiance** (`js/son.js`) : il n'y a pas de fichier audio, la musique est générée en direct par le navigateur (Web Audio API) : nappes douces, basse ronde et petites notes avec écho sur une boucle d'accords « chill » à 72 BPM. Elle est coupée par défaut et démarre avec le bouton « Son » en haut à droite (les navigateurs interdisent le son automatique). Pour la remplacer par un vrai morceau libre de droits, il suffira d'ajouter un fichier `.mp3`.
 
@@ -84,6 +84,7 @@ Les photos de `assets/img/` viennent de [Lorem Picsum](https://picsum.photos/), 
 ## Reste à faire
 
 - [ ] Vérifier les dates et les textes de la frise (bac, BUT, stage)
+- [ ] Remplacer les logos provisoires de « Vu dans » (L'Équipe, LCI, BBC…) par les vraies marques : à faire avant la mise en ligne
 - [ ] Réécrire les textes provisoires avec tes mots
 - [ ] Remplacer les affiches d'exemple par tes vrais projets
 - [ ] Remplacer les photos d'ambiance (idéalement par tes propres photos ou visuels)

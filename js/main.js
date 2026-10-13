@@ -367,6 +367,9 @@
     gsap.set(path, { strokeDasharray: len, strokeDashoffset: len, strokeOpacity: 1 });
   });
   gsap.set($$('.hl__fill, .tl__fill', heroSvg), { fillOpacity: 0 });
+  // L'intro commence en négatif : fond noir, nom écrit en blanc (le flash remet les couleurs normales)
+  gsap.set('.hero', { backgroundColor: '#1d1c1a' });
+  gsap.set(heroSvg, { '--hero-ink': '#f4f2ec' });
 
   Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), wait(2500)]).then(() => {
     fitWords();
@@ -424,7 +427,13 @@
       .to($$('.tl__fill', heroSvg), { fillOpacity: 1, duration: 0.45, stagger: 0.03, ease: 'power1.out' }, tagAt + 0.8)
       .to($$('.tl__line', heroSvg), { strokeOpacity: 0, duration: 0.4 }, tagAt + 1.6)
       .to('.hero__rule', { strokeDashoffset: 0, duration: 1.1, ease: 'expo.inOut' }, tagAt + 1.1);
-    const restAt = tagAt + 1.5;
+    // Flash : l'écran blanchit d'un coup, et en dessous le fond devient crème et le nom noir
+    const flashAt = tagAt + 2.3;
+    tl.to('.hero__flash', { opacity: 1, duration: 0.12, ease: 'power2.in' }, flashAt)
+      .set('.hero', { backgroundColor: '#f4f2ec' }, flashAt + 0.12)
+      .set(heroSvg, { '--hero-ink': '#252422' }, flashAt + 0.12)
+      .to('.hero__flash', { opacity: 0, duration: 0.7, ease: 'power2.out' }, flashAt + 0.16);
+    const restAt = flashAt + 0.3;
     tl.from('.hero__badge', { scale: 0, rotation: -120, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 50%' }, restAt)
       .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, restAt + 0.2)
       .from('.hero__note', { autoAlpha: 0, y: -10, rotation: 14, duration: 0.8, ease: 'back.out(2)' }, restAt + 0.6)
@@ -433,7 +442,7 @@
   }
 
   /* ---------- Sphère d'affiches (CSS 3D) ---------- */
-  const world = { idle: 0, scroll: 0, mx: 0, my: 0, tmx: 0, tmy: 0, active: false };
+  const world = { idle: 0, scroll: 0, mx: 0, my: 0, tmx: 0, tmy: 0, active: false, dragX: 0, dragY: 0, vx: 0, vy: 0, dragging: false };
   function buildWorld() {
     const sphere = $('.world__sphere');
     const count = window.innerWidth < 600 ? 26 : 34;
@@ -451,12 +460,48 @@
       world.tmx = (e.clientX / window.innerWidth - 0.5) * 2;
       world.tmy = (e.clientY / window.innerHeight - 0.5) * 2;
     }, { passive: true });
+    // Glisser pour faire tourner (en plus de la rotation automatique, du scroll et de la souris)
+    const scene = $('.world__scene');
+    let lastX = 0;
+    let lastY = 0;
+    scene.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      world.dragging = true;
+      lastX = e.clientX; lastY = e.clientY;
+      world.vx = 0; world.vy = 0;
+      scene.setPointerCapture(e.pointerId);
+      scene.classList.add('is-dragging');
+    });
+    scene.addEventListener('pointermove', (e) => {
+      if (!world.dragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.pointerType === 'touch' ? 0 : e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      world.vy = dx * 0.45;
+      world.vx = -dy * 0.3;
+      world.dragY += world.vy;
+      world.dragX = Math.max(-40, Math.min(40, world.dragX + world.vx));
+    });
+    const release = () => { world.dragging = false; scene.classList.remove('is-dragging'); };
+    scene.addEventListener('pointerup', release);
+    scene.addEventListener('pointercancel', release);
+
     gsap.ticker.add((time, deltaTime) => {
       if (!world.active) return;
       world.idle += deltaTime * 0.006;
       world.mx += (world.tmx - world.mx) * 0.05;
       world.my += (world.tmy - world.my) * 0.05;
-      sphere.style.transform = `rotateX(${(-10 - world.my * 14).toFixed(2)}deg) rotateY(${(world.idle + world.scroll + world.mx * 25).toFixed(2)}deg)`;
+      if (!world.dragging) {
+        // élan après le lâcher, qui ralentit doucement
+        world.dragY += world.vy;
+        world.dragX = Math.max(-40, Math.min(40, world.dragX + world.vx));
+        world.vy *= 0.95;
+        world.vx *= 0.9;
+        world.dragX *= 0.985; // l'inclinaison revient peu à peu
+      }
+      const rx = -10 - world.my * 14 + world.dragX;
+      const ry = world.idle + world.scroll + world.mx * 25 + world.dragY;
+      sphere.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
     });
   }
 
@@ -546,17 +591,22 @@
     gsap.timeline({ scrollTrigger: { trigger: '.authors', start: 'top 55%' } })
       .from('.authors__text', { autoAlpha: 0, duration: 0.6 })
       .from(typed, { autoAlpha: 0, duration: 0.01, stagger: 0.12 }, '+=0.2');
-    gsap.set('.bracket', { yPercent: -50 });
-    gsap.fromTo('.bracket--left', { xPercent: -70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
-    gsap.fromTo('.bracket--right', { xPercent: 70 }, { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.definition__card', start: 'top bottom', end: 'center center', scrub: 1 } });
-    const defChars = SplitText.create('.definition__word', { type: 'chars', mask: 'chars' }).chars;
-    gsap.from(defChars, { yPercent: 110, duration: 1.1, stagger: 0.07, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 80%' } });
-    gsap.from('.definition__badge', { scale: 0, rotation: -180, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: '.definition__word', start: 'top 75%' } });
-    gsap.from('.definition__note', { autoAlpha: 0, rotation: 6, duration: 0.8, ease: 'back.out(2)', scrollTrigger: { trigger: '.definition__word', start: 'top 70%' } });
-    const defWords = SplitText.create('.definition__text', { type: 'words' }).words;
-    gsap.fromTo(defWords, { color: '#cfcac0' }, { color: '#252422', stagger: 0.05, ease: 'none', scrollTrigger: { trigger: '.definition__text', start: 'top 78%', end: 'bottom 45%', scrub: 1 } });
-    gsap.from(['.definition__phon', '.definition__syn', '.definition__who'], { y: 16, autoAlpha: 0, duration: 0.8, stagger: 0.1, scrollTrigger: { trigger: '.definition__phon', start: 'top 85%' } });
-    gsap.fromTo('.tools__track', { xPercent: 0 }, { xPercent: -50, duration: 36, ease: 'none', repeat: -1 });
+    // Définition (comme ownitt.fr) : les crochets arrivent des côtés, ADEM monte, l'étoile apparaît,
+    // la définition s'allume mot par mot, puis les logos
+    const brackets = $$('.def__bracket');
+    brackets.forEach((b) => { b.style.transform = 'none'; });
+    gsap.set('.def__bracket--left', { yPercent: -50, xPercent: -260, opacity: 0 });
+    gsap.set('.def__bracket--right', { yPercent: -50, scaleX: -1, xPercent: 260, opacity: 0 });
+    gsap.to(brackets, { xPercent: 0, opacity: 1, ease: 'power2.out', scrollTrigger: { trigger: '.definition', start: 'top bottom', end: 'top 10%', scrub: 1 } });
+    gsap.timeline({ scrollTrigger: { trigger: '.def__inner', start: 'top 75%' } })
+      .from('.def__kicker', { autoAlpha: 0, y: 12, duration: 0.6, ease: 'power2.out' })
+      .from('.def__word', { yPercent: 108, duration: 1.2, ease: 'expo.out' }, 0.1)
+      .from('.def__star', { scale: 0, rotation: -180, duration: 1.1, ease: 'back.out(1.6)' }, 0.55)
+      .from('.def__pron', { autoAlpha: 0, y: 14, duration: 0.7, ease: 'power2.out' }, 0.6)
+      .from('.def__num', { autoAlpha: 0, duration: 0.4 }, 0.75);
+    gsap.fromTo('.def__w', { opacity: 0.06, y: 10 }, { opacity: 1, y: 0, stagger: 0.06, ease: 'none', scrollTrigger: { trigger: '.def__text', start: 'top 85%', end: 'bottom 50%', scrub: 1 } });
+    gsap.from(['.def__syn', '.def__authors'], { autoAlpha: 0, y: 12, duration: 0.7, stagger: 0.12, ease: 'power2.out', scrollTrigger: { trigger: '.def__syn', start: 'top 92%' } });
+    gsap.from('.def__logos', { autoAlpha: 0, y: 30, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: '.definition', start: 'top 35%' } });
 
     // 6. Grand mot rempli d'une photo, puis la question
     const q1 = SplitText.create('.bigword__question', { type: 'words' }).words;
