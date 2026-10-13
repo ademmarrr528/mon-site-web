@@ -83,7 +83,7 @@
       <ul class="qmenu__list" id="qmenu-list">
         <li><a class="qmenu__item" href="#top" data-index="0"><span class="qmenu__thumb qmenu__thumb--badge"><svg><use href="#macaron"/></svg></span><span class="qmenu__text">Accueil</span></a></li>
         <li><a class="qmenu__item" href="#parcours" data-index="1"><span class="qmenu__thumb"><img src="assets/img/journal-1.webp" alt=""></span><span class="qmenu__text">Parcours</span></a></li>
-        <li><a class="qmenu__item" href="#manifeste" data-index="2"><span class="qmenu__thumb"><img src="assets/img/menu-2.webp" alt=""></span><span class="qmenu__text">À propos</span></a></li>
+        <li><a class="qmenu__item" href="#definition" data-index="2"><span class="qmenu__thumb"><img src="assets/img/menu-2.webp" alt=""></span><span class="qmenu__text">À propos</span></a></li>
         <li><a class="qmenu__item" href="#projets" data-index="3"><span class="qmenu__thumb qmenu__thumb--poster"><img src="assets/projets/dernier-tour.webp" alt=""></span><span class="qmenu__text">Projets</span></a></li>
         <li><a class="qmenu__item" href="#methode" data-index="4"><span class="qmenu__thumb"><img src="assets/img/impact.webp" alt=""></span><span class="qmenu__text">Savoir-faire</span></a></li>
         <li><a class="qmenu__item" href="#contact" data-index="5"><span class="qmenu__thumb qmenu__thumb--rust"><svg><use href="#macaron"/></svg></span><span class="qmenu__text">Contact</span></a></li>
@@ -224,26 +224,18 @@
       </div>
     </section>
 
-    <!-- 4. MANIFESTE -->
-    <section class="manifesto" id="manifeste" data-header="light" data-menu="2">
-      <div class="manifesto__stage">
-        <svg class="manifesto__badge" aria-hidden="true"><use href="#macaron"/></svg>
-        <div class="manifesto__block">
-          <h2 class="manifesto__title">On passe trop de temps à vouloir faire joli.</h2>
-          <p class="manifesto__sub">À chercher l'effet qui ferait « waouh ».</p>
-          <p class="manifesto__accent">Mais une bonne affiche se joue ailleurs.</p>
-        </div>
-        <div class="manifesto__block">
-          <h2 class="manifesto__title">Comme un match, elle se prépare.</h2>
-          <p class="manifesto__sub">Une idée, un plan de jeu, puis l'exécution.</p>
-          <p class="manifesto__accent">L'idée d'abord, la forme ensuite.</p>
-        </div>
-        <div class="manifesto__block manifesto__block--right">
-          <h2 class="manifesto__title">Une affiche n'a pas 90 minutes pour convaincre.</h2>
-          <p class="manifesto__accent">Elle a trois secondes. Je fais en sorte qu'elles comptent.</p>
-        </div>
-        <p class="manifesto__label">Manifeste</p>
+    <!-- 4. RÉSEAUX (façon « What's up on socials » de landonorris.com) : éventail de cartes qui s'ouvre au scroll -->
+    <section class="socials" id="reseaux" data-header="dark" data-menu="2" aria-label="Mes réseaux">
+      <div class="socials__icons" aria-hidden="true">
+        <svg class="socials__icon is-active" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8h11a4 4 0 0 1 4 4.3l-.4 3.9a2.6 2.6 0 0 1-4.6 1.4L15 15.5H9l-1.5 2.1a2.6 2.6 0 0 1-4.6-1.4l-.4-3.9A4 4 0 0 1 6.5 8z"/><path d="M7.5 11v3M6 12.5h3"/><circle cx="16" cy="11.6" r=".6"/><circle cx="17.6" cy="13.2" r=".6"/></g></svg>
+        <svg class="socials__icon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.2l3.4 2.5-1.3 4h-4.2l-1.3-4z"/><path d="M12 3v4.2M15.4 9.7l4.3-1.4M14.1 13.7l2.6 3.6M9.9 13.7l-2.6 3.6M8.6 9.7L4.3 8.3"/></g></svg>
+        <svg class="socials__icon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.6"/><rect x="17" y="14" width="4" height="6" rx="1.6"/></g></svg>
+        <svg class="socials__icon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 4.5l4 4L9 19l-5 1 1-5z"/><path d="M13.5 6.5l4 4"/></g></svg>
       </div>
+      <h2 class="socials__title"><span class="socials__bold">Quoi de neuf</span> <span class="socials__serif">sur mes réseaux</span></h2>
+      <div class="socials__fan"></div>
+      <p class="socials__follow">Suis mon travail sur les réseaux</p>
+      <p class="socials__links"><a href="#contact">Instagram</a><a href="#contact">LinkedIn</a><a href="#contact">Behance</a><a href="#contact">TikTok</a></p>
     </section>
 
     <!-- 5. DÉFINITION -->
@@ -341,36 +333,44 @@
     </section>
   </main>
 
-  <!-- 12. CONTACT / PIED DE PAGE -->
-  <footer class="footer" id="contact" data-header="dark" data-menu="5">
-    <div class="footer__top">
-      <form class="footer__form" novalidate>
-        <p class="label">( Contact )</p>
-        <h2 class="footer__title"><span>Écrivez-moi,</span> <em>sans bla-bla.</em></h2>
-        <label class="sr-only" for="email-contact">Votre e-mail</label>
-        <input class="footer__input" id="email-contact" type="email" placeholder="votre@email.com" autocomplete="email">
-        <button class="pill pill--dark" type="submit">M'écrire <span class="round round--light">→</span></button>
-        <p class="footer__msg" aria-live="polite"></p>
-      </form>
-      <div class="footer__side">
-        <div class="footer__sticker">
-          <svg class="footer__badge" aria-hidden="true"><use href="#macaron"/></svg>
-          <span class="footer__sticker-text">Dispo<br>stage<br>2027</span>
+  <!-- 12. PIED DE PAGE (façon landonorris.com) : panneau sombre qui monte, titre, signature, photo détourée -->
+  <footer class="lfoot" id="contact" data-header="dark" data-menu="5">
+    <div class="lfoot__panel">
+      <svg class="lfoot__tab" viewBox="0 0 400 26" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26C44 26 52 0 96 0H304C348 0 356 26 400 26Z"/></svg>
+      <div class="lfoot__topo" aria-hidden="true"></div>
+
+      <div class="lfoot__head">
+        <span class="lfoot__sign" aria-hidden="true">Adem</span>
+        <h2 class="lfoot__title"><span class="lfoot__bold">Toujours</span> <span class="lfoot__serif">dans</span><br><span class="lfoot__bold">le</span> <span class="lfoot__serif">jeu</span><span class="lfoot__bold">.</span></h2>
+      </div>
+
+      <!-- Photo PROVISOIRE : remplace assets/img/portrait-provisoire.svg par ta photo détourée (PNG sans fond) -->
+      <img class="lfoot__portrait" src="assets/img/portrait-provisoire.svg" alt="" width="600" height="700">
+
+      <nav class="lfoot__col lfoot__col--left" aria-label="Pages">
+        <p class="lfoot__label">Pages</p>
+        <a href="#top">Accueil</a><a href="#parcours">Parcours</a><a href="#reseaux">Réseaux</a><a href="#projets">Projets</a><a href="#methode">Savoir-faire</a>
+        <a class="lfoot__accent" href="mailto:prenom.nom@email.fr">Contact</a>
+      </nav>
+      <nav class="lfoot__col lfoot__col--right" aria-label="Réseaux">
+        <p class="lfoot__label">Me suivre</p>
+        <a href="#contact">Instagram</a><a href="#contact">LinkedIn</a><a href="#contact">Behance</a><a href="#contact">TikTok</a>
+      </nav>
+
+      <div class="lfoot__strip">
+        <div class="lfoot__marquee" aria-hidden="true">
+          <div class="lfoot__track">
+            <span>Affiches</span><span>Print</span><span>Bannières web</span><span>Identité visuelle</span><span>Direction artistique</span><span>Motion</span><span>Réseaux sociaux</span>
+            <span>Affiches</span><span>Print</span><span>Bannières web</span><span>Identité visuelle</span><span>Direction artistique</span><span>Motion</span><span>Réseaux sociaux</span>
+          </div>
         </div>
-        <p class="label">( M'appeler )</p>
-        <p class="footer__phone">06 00 00 00 00</p>
-        <p class="footer__socials"><a href="#contact">Instagram ↗</a><a href="#contact">LinkedIn ↗</a><a href="#contact">Behance ↗</a></p>
+        <a class="lfoot__cta" href="mailto:prenom.nom@email.fr">Proposer un stage <span aria-hidden="true">↗</span></a>
       </div>
     </div>
-    <p class="footer__logo">Adem <em>Marine</em></p>
-    <div class="footer__links">
-      <p><span>Portfolio</span><a href="#parcours">Parcours</a><a href="#manifeste">À propos</a><a href="#projets">Projets</a><a href="#methode">Savoir-faire</a><a href="#contact">Contact</a></p>
-      <p><span>Graphiste</span><a href="#projets">Affiches</a><a href="#projets">Print</a><a href="#projets">Bannières web</a><a href="#projets">Identité visuelle</a></p>
-      <p><span>Recherche</span><a href="#contact">Stage en agence de communication</a><a href="#contact">Direction artistique</a><a href="#contact">Paris &amp; ailleurs</a></p>
-    </div>
-    <div class="footer__bottom">
-      <p><a href="#contact">Mentions légales</a> · <a href="#contact">Confidentialité</a> · <span>© 2026 Adem Marine</span></p>
-      <a class="footer__up" href="#top">Haut de page <span class="round">↗</span></a>
+    <div class="lfoot__bottom">
+      <span class="lfoot__foot" aria-hidden="true"><svg class="lfoot__curve" viewBox="0 0 44 40" preserveAspectRatio="none"><path d="M0 0H44V40C20 40 24 0 0 0Z"/></svg><i></i><svg class="lfoot__curve lfoot__curve--right" viewBox="0 0 44 40" preserveAspectRatio="none"><path d="M0 0H44V40C20 40 24 0 0 0Z"/></svg></span>
+      <p>© 2026 Adem Marine. Tous droits réservés.</p>
+      <p><a href="#contact">Mentions légales</a><a href="#contact">Confidentialité</a></p>
     </div>
   </footer>
 
