@@ -512,6 +512,8 @@ html.lenis, html.lenis body { height: auto; }
   margin-top: clamp(30px, 5vh, 52px);
   font-size: clamp(2.6rem, 4.3vw, 4.4rem); line-height: 0.92; text-transform: uppercase;
 }
+/* masques de SplitText : un peu de marge en haut pour ne pas couper l'accent de RÉSEAUX pendant l'animation */
+.socials__title > span > div { padding-top: 0.16em; margin-top: -0.16em; }
 .socials__bold { font-family: var(--f-display); font-stretch: 75%; font-weight: 700; letter-spacing: -0.02em; }
 .socials__serif { font-family: var(--f-serif); font-weight: 400; letter-spacing: -0.03em; }
 /* L'éventail : chaque carte a sa place (--x, --y en largeurs de carte, --r en degrés), --open va de 0 (cartes empilées) à 1 (éventail ouvert) */
@@ -996,19 +998,20 @@ html.lenis, html.lenis body { height: auto; }
   .def__inner { margin-top: -10vh; }
   .def__logos { padding-bottom: 3.5vh; }
   .explore__note { display: none; }
-  .socials__fan { --cw: 31vw; }
+  .socials__fan { --cw: 37vw; }
   .lfoot { --lf-band: 76px; }
-  .lfoot__panel { height: max(640px, calc(100svh - 110px)); }
+  /* la plaque laisse le haut de l'écran libre pour le logo et le menu */
+  .lfoot__panel { height: max(560px, calc(100vh - 190px)); height: max(560px, calc(100svh - 190px)); }
   .lfoot__head { top: 11%; }
   .lfoot__title { font-size: clamp(2.4rem, 12vw, 3.4rem); }
   .lfoot__sign { font-size: clamp(2.8rem, 14vw, 4rem); top: -0.7em; }
-  .lfoot__col { top: 34%; width: 44%; }
+  .lfoot__col { top: 31%; width: 44%; }
   .lfoot__col--left { left: 4%; }
   .lfoot__col--right { right: 4%; }
   .lfoot__col a { font-size: clamp(1.05rem, 5vw, 1.3rem); }
   .lfoot__col .lfoot__accent { margin-top: 14px; }
   .lfoot__label { margin-bottom: 8px; }
-  .lfoot__portrait { height: calc(40% + var(--lf-foot)); }
+  .lfoot__portrait { height: calc(38% + var(--lf-foot)); }
   .lfoot__marquee { bottom: 46px; }
   .lfoot__foot { left: 7%; right: 7%; }
   .lfoot__bottom { flex-direction: column-reverse; align-items: center; justify-content: flex-end; gap: 6px; padding: calc(var(--lf-foot) + 6px) 0 0; text-align: center; }
