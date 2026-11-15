@@ -9,7 +9,7 @@
 
    - titre       : le nom du projet
    - type        : petite étiquette affichée à côté du titre
-   - categorie   : "affiche", "print", "bannieres" ou "web"
+   - categorie   : "affiche", "print", "edition", "bannieres" ou "web"
                    (étiquette en haut à droite de la diapositive)
    - annee       : l'année de réalisation
    - image       : chemin vers ton visuel (format portrait 2:3 idéal,
@@ -24,7 +24,7 @@
                    les unes sous les autres quand on clique sur
                    « Voir le projet » ; legende = petit texte sous l'image
 
-   ✅ Coccinelle est un vrai projet.
+   ✅ Coccinelle et Diapar sont de vrais projets.
    ⚠️ Les autres sont des EXEMPLES PROVISOIRES, à remplacer par
    tes vrais projets au fur et à mesure.
    ========================================================= */
@@ -51,6 +51,20 @@ window.PROJETS = [
       { image: 'assets/projets/coccinelle/mobile-1664.webp', legende: "Version mobile · Cocci'Promos, juin 2026" },
       { image: 'assets/projets/coccinelle/mobile-ristorante.webp', legende: 'Version mobile · En mai, voisinez' },
       { image: 'assets/projets/coccinelle/mobile-old-el-paso.webp', legende: 'Version mobile · En mai, voisinez' },
+    ],
+  },
+  {
+    titre: 'Diapar',
+    type: 'Édition · Agenda 2027',
+    categorie: 'edition',
+    annee: 2026,
+    image: 'assets/projets/diapar/couverture.webp',
+    apercu: 'assets/projets/diapar/mise-en-situation.webp',
+    couleur: '#E6E1D6',
+    encre: '#4B604C',
+    description: "Couverture de l'agenda 2027 de Diapar. De grandes flèches qui se chevauchent, inspirées du logo, en vert sauge ton sur ton : le symbole en blanc et l'année sur deux lignes en première de couverture, le logo en couleur au dos.",
+    galerie: [
+      { image: 'assets/projets/diapar/mise-en-situation.webp', legende: 'Première et quatrième de couverture' },
     ],
   },
   {
