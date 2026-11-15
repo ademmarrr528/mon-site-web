@@ -50,7 +50,7 @@
   viewer.addEventListener('close', () => { if (lenis) lenis.start(); });
 
   /* ---------- Diapositives des projets ---------- */
-  const categories = { affiche: 'Affiche', print: 'Print', bannieres: 'Bannières web', web: 'Concept web' };
+  const categories = { affiche: 'Affiche', print: 'Print', edition: 'Édition', bannieres: 'Bannières web', web: 'Concept web' };
   const slideBgs = ['#f4f2ec', '#e6e2d8']; // crème et gris pierre en alternance
   $('.projects__slides').innerHTML = projets.map((p, i) => `
     <article class="slide" style="--bg:${slideBgs[i % 2]};--c:${esc(p.couleur)}" aria-label="Projet ${i + 1} : ${esc(p.titre)}">
