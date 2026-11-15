@@ -718,6 +718,8 @@ html.lenis, html.lenis body { height: auto; }
   overflow: hidden;
 }
 .slide__media img { position: absolute; left: 50%; top: 7%; height: 86%; width: auto; max-width: none; transform: translateX(-50%); border-radius: 6px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.28); }
+/* Projet avec une mise en situation en paysage : l'image remplit tout le cadre */
+.slide__media--wide img { left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform: none; border-radius: 0; box-shadow: none; }
 .slide__num {
   position: absolute; right: calc(var(--gutter) + 40px); bottom: -0.14em;
   font-family: var(--f-display); font-stretch: 75%; font-weight: 700;
@@ -741,6 +743,18 @@ html.lenis, html.lenis body { height: auto; }
 .viewer::backdrop { background: rgba(29, 28, 26, 0.94); }
 .viewer__inner { height: 100%; display: grid; place-items: center; padding: 70px var(--gutter) 30px; }
 .viewer__img { max-height: 84vh; width: auto; border-radius: 8px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5); }
+.viewer__fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+/* Projet avec plusieurs images : on les fait défiler les unes sous les autres */
+.viewer__inner.is-gallery {
+  display: flex; flex-direction: column; align-items: center; gap: clamp(30px, 5vh, 56px);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: clamp(90px, 12vh, 120px) var(--gutter) 80px;
+}
+.is-gallery .viewer__img { max-width: min(1100px, 100%); max-height: 78vh; height: auto; }
+.viewer__fig figcaption { font-weight: 500; font-size: 0.82rem; color: var(--muted-paper); }
+.viewer__head { text-align: center; }
+.viewer__title { font-family: var(--f-display); font-stretch: 75%; font-weight: 700; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1; text-transform: uppercase; }
+.viewer__type { margin-top: 8px; font-size: 0.9rem; color: var(--muted-paper); }
 .viewer__close { position: absolute; top: 22px; right: var(--gutter); }
 
 /* =========================================================

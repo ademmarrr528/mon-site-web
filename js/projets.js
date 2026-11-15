@@ -9,19 +9,50 @@
 
    - titre       : le nom du projet
    - type        : petite étiquette affichée à côté du titre
-   - categorie   : "affiche", "print" ou "web" (sert aux filtres)
+   - categorie   : "affiche", "print", "bannieres" ou "web"
+                   (étiquette en haut à droite de la diapositive)
    - annee       : l'année de réalisation
    - image       : chemin vers ton visuel (format portrait 2:3 idéal,
                    par exemple 1280 × 1920 px en .webp ou .jpg)
    - couleur     : couleur qui remplit la ligne au survol
    - encre       : couleur du texte par-dessus cette couleur
    - description : 1 à 3 phrases (le contexte, l'idée, le résultat)
+   - apercu      : (facultatif) image en format paysage pour la grande
+                   diapositive du projet (par exemple une mise en
+                   situation sur écran) ; sinon c'est « image » qui sert
+   - galerie     : (facultatif) toutes les images du projet, affichées
+                   les unes sous les autres quand on clique sur
+                   « Voir le projet » ; legende = petit texte sous l'image
 
-   ⚠️ Les 10 projets ci-dessous sont des EXEMPLES PROVISOIRES,
-   à remplacer par tes vrais projets.
+   ✅ Coccinelle est un vrai projet.
+   ⚠️ Les autres sont des EXEMPLES PROVISOIRES, à remplacer par
+   tes vrais projets au fur et à mesure.
    ========================================================= */
 
 window.PROJETS = [
+  {
+    titre: 'Coccinelle',
+    type: 'Bannières web · Promotions',
+    categorie: 'bannieres',
+    annee: 2026,
+    image: 'assets/projets/coccinelle/couverture.webp',
+    apercu: 'assets/projets/coccinelle/mise-en-situation.webp',
+    couleur: '#D4EEF2',
+    encre: '#C62B1C',
+    description: "Bannières promotionnelles pour le site coccinelle.fr : « En mai, voisinez, tout est prêt ! » puis la Fête des clients de juin. Chaque offre existe en version ordinateur et en version mobile, avec une remise en très gros pour qu'elle se lise en un coup d'œil.",
+    galerie: [
+      { image: 'assets/projets/coccinelle/mise-en-situation.webp', legende: 'Mise en situation' },
+      { image: 'assets/projets/coccinelle/site-coccinelle.webp', legende: 'En ligne sur coccinelle.fr' },
+      { image: 'assets/projets/coccinelle/pc-fete-des-clients.webp', legende: 'Version ordinateur · Fête des clients, juin 2026' },
+      { image: 'assets/projets/coccinelle/pc-yop.webp', legende: 'Version ordinateur · Grand jeu anniversaire, juin 2026' },
+      { image: 'assets/projets/coccinelle/pc-persil.webp', legende: 'Version ordinateur · Les bons plans Cocci' },
+      { image: 'assets/projets/coccinelle/pc-ristorante.webp', legende: 'Version ordinateur · En mai, voisinez' },
+      { image: 'assets/projets/coccinelle/pc-old-el-paso.webp', legende: 'Version ordinateur · En mai, voisinez' },
+      { image: 'assets/projets/coccinelle/mobile-1664.webp', legende: "Version mobile · Cocci'Promos, juin 2026" },
+      { image: 'assets/projets/coccinelle/mobile-ristorante.webp', legende: 'Version mobile · En mai, voisinez' },
+      { image: 'assets/projets/coccinelle/mobile-old-el-paso.webp', legende: 'Version mobile · En mai, voisinez' },
+    ],
+  },
   {
     titre: 'Dernier tour',
     type: 'Affiche · F1',
@@ -101,16 +132,6 @@ window.PROJETS = [
     couleur: '#FF5A1F',
     encre: '#0B0B0C',
     description: "Déclinaisons print réalisées pendant le stage en agence : affiche grand format, flyer et kakémono.",
-  },
-  {
-    titre: 'Bannières web',
-    type: 'Bannières · Stage en agence',
-    categorie: 'print',
-    annee: 2026,
-    image: 'assets/projets/bannieres-web.webp',
-    couleur: '#2D6BFF',
-    encre: '#FFFFFF',
-    description: "Déclinaison d'une campagne dans les formats publicitaires web standards (300×250, 728×90, 160×600…).",
   },
   {
     titre: 'Concept de site',
