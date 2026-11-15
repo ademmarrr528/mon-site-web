@@ -48,8 +48,9 @@ window.PROJETS = [
       { image: 'assets/projets/coccinelle/pc-persil.webp', legende: 'Version ordinateur · Les bons plans Cocci' },
       { image: 'assets/projets/coccinelle/pc-ristorante.webp', legende: 'Version ordinateur · En mai, voisinez' },
       { image: 'assets/projets/coccinelle/pc-old-el-paso.webp', legende: 'Version ordinateur · En mai, voisinez' },
-      { image: 'assets/projets/coccinelle/mobile-ristorante.webp', legende: 'Version mobile' },
-      { image: 'assets/projets/coccinelle/mobile-old-el-paso.webp', legende: 'Version mobile' },
+      { image: 'assets/projets/coccinelle/mobile-1664.webp', legende: "Version mobile · Cocci'Promos, juin 2026" },
+      { image: 'assets/projets/coccinelle/mobile-ristorante.webp', legende: 'Version mobile · En mai, voisinez' },
+      { image: 'assets/projets/coccinelle/mobile-old-el-paso.webp', legende: 'Version mobile · En mai, voisinez' },
     ],
   },
   {
