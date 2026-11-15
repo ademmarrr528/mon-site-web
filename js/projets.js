@@ -37,7 +37,7 @@ window.PROJETS = [
     annee: 2026,
     image: 'assets/projets/coccinelle/couverture.webp',
     apercu: 'assets/projets/coccinelle/mise-en-situation.webp',
-    couleur: '#FFFFFF',
+    couleur: '#D4EEF2',
     encre: '#C62B1C',
     description: "Bannières promotionnelles pour le site coccinelle.fr : « En mai, voisinez, tout est prêt ! » puis la Fête des clients de juin. Chaque offre existe en version ordinateur et en version mobile, avec une remise en très gros pour qu'elle se lise en un coup d'œil.",
     galerie: [
