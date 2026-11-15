@@ -9,19 +9,41 @@
 
    - titre       : le nom du projet
    - type        : petite étiquette affichée à côté du titre
-   - categorie   : "affiche", "print" ou "web" (sert aux filtres)
+   - categorie   : "affiche", "print", "bannieres" ou "web"
+                   (étiquette en haut à droite de la diapositive)
    - annee       : l'année de réalisation
    - image       : chemin vers ton visuel (format portrait 2:3 idéal,
                    par exemple 1280 × 1920 px en .webp ou .jpg)
    - couleur     : couleur qui remplit la ligne au survol
    - encre       : couleur du texte par-dessus cette couleur
    - description : 1 à 3 phrases (le contexte, l'idée, le résultat)
+   - galerie     : (facultatif) toutes les images du projet, affichées
+                   les unes sous les autres quand on clique sur
+                   « Voir le projet » ; legende = petit texte sous l'image
 
-   ⚠️ Les 10 projets ci-dessous sont des EXEMPLES PROVISOIRES,
-   à remplacer par tes vrais projets.
+   ✅ Coccinelle est un vrai projet.
+   ⚠️ Les autres sont des EXEMPLES PROVISOIRES, à remplacer par
+   tes vrais projets au fur et à mesure.
    ========================================================= */
 
 window.PROJETS = [
+  {
+    titre: 'Coccinelle',
+    type: 'Bannières web · Promotions',
+    categorie: 'bannieres',
+    annee: 2026,
+    image: 'assets/projets/coccinelle/couverture.webp',
+    couleur: '#2A2D62',
+    encre: '#D5E18F',
+    description: "Bannières promotionnelles pour le site coccinelle.fr, sur le thème « En mai, voisinez, tout est prêt ! ». Chaque offre existe en version ordinateur (format large) et en version mobile (format carré), avec une remise en très gros pour qu'elle se lise en un coup d'œil.",
+    galerie: [
+      { image: 'assets/projets/coccinelle/pc-ristorante.webp', legende: 'Version ordinateur' },
+      { image: 'assets/projets/coccinelle/pc-old-el-paso.webp', legende: 'Version ordinateur' },
+      { image: 'assets/projets/coccinelle/pc-persil.webp', legende: 'Version ordinateur · Les bons plans Cocci' },
+      { image: 'assets/projets/coccinelle/mobile-ristorante.webp', legende: 'Version mobile' },
+      { image: 'assets/projets/coccinelle/mobile-old-el-paso.webp', legende: 'Version mobile' },
+    ],
+  },
   {
     titre: 'Dernier tour',
     type: 'Affiche · F1',
@@ -101,16 +123,6 @@ window.PROJETS = [
     couleur: '#FF5A1F',
     encre: '#0B0B0C',
     description: "Déclinaisons print réalisées pendant le stage en agence : affiche grand format, flyer et kakémono.",
-  },
-  {
-    titre: 'Bannières web',
-    type: 'Bannières · Stage en agence',
-    categorie: 'print',
-    annee: 2026,
-    image: 'assets/projets/bannieres-web.webp',
-    couleur: '#2D6BFF',
-    encre: '#FFFFFF',
-    description: "Déclinaison d'une campagne dans les formats publicitaires web standards (300×250, 728×90, 160×600…).",
   },
   {
     titre: 'Concept de site',

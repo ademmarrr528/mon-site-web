@@ -60,6 +60,8 @@ Le menu (en haut à droite) affiche le nom de la section en cours et se déplie 
 2. Ouvre `js/projets.js`, copie un bloc `{ ... }` et change les infos.
 3. Enregistre : les diapositives, la sélection, la sphère et la galerie se mettent à jour toutes seules.
 
+Pour un projet avec plusieurs visuels (par exemple des bannières en version ordinateur et mobile), ajoute une `galerie` : toutes ses images s'affichent les unes sous les autres quand on clique sur « Voir le projet ». L'`image` principale sert de couverture (sphère, sélection, cartes) : garde-la au format portrait. Exemple : le projet Coccinelle, dont les visuels sont dans `assets/projets/coccinelle/`.
+
 Les diapositives alternent crème et gris pierre ; la `couleur` du projet sert de fond au cadre du visuel.
 
 ## Les outils utilisés (à savoir expliquer en entretien)

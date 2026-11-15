@@ -30,20 +30,27 @@
      ======================================================= */
 
   /* ---------- Visionneuse (projets + galerie) ---------- */
+  // Un projet avec une « galerie » affiche toutes ses images les unes sous les autres
   const viewer = $('#viewer');
+  const viewerInner = $('.viewer__inner', viewer);
   function openViewer(p) {
-    const img = $('.viewer__img', viewer);
-    img.src = p.image;
-    img.alt = `${p.titre}, ${p.type}`;
+    const items = p.galerie && p.galerie.length ? p.galerie : [{ image: p.image }];
+    const gallery = items.length > 1;
+    viewerInner.classList.toggle('is-gallery', gallery);
+    viewerInner.innerHTML = (gallery ? `<header class="viewer__head"><p class="viewer__title">${esc(p.titre)}</p><p class="viewer__type">${esc(p.type)} · ${esc(p.annee)}</p></header>` : '')
+      + items.map((it) => `<figure class="viewer__fig"><img class="viewer__img" src="${esc(it.image)}" alt="${esc(p.titre)}, ${esc(it.legende || p.type)}">${it.legende ? `<figcaption>${esc(it.legende)}</figcaption>` : ''}</figure>`).join('');
+    viewerInner.scrollTop = 0;
     if (typeof viewer.showModal === 'function') viewer.showModal(); else viewer.setAttribute('open', '');
     if (lenis) lenis.stop();
   }
   $('.viewer__close', viewer).addEventListener('click', () => viewer.close());
-  viewer.addEventListener('click', (e) => { if (e.target === viewer || e.target.classList.contains('viewer__inner')) viewer.close(); });
+  viewer.addEventListener('click', (e) => {
+    if (e.target === viewer || e.target === viewerInner || e.target.classList.contains('viewer__fig')) viewer.close();
+  });
   viewer.addEventListener('close', () => { if (lenis) lenis.start(); });
 
   /* ---------- Diapositives des projets ---------- */
-  const categories = { affiche: 'Affiche', print: 'Print & bannières', web: 'Concept web' };
+  const categories = { affiche: 'Affiche', print: 'Print', bannieres: 'Bannières web', web: 'Concept web' };
   const slideBgs = ['#f4f2ec', '#e6e2d8']; // crème et gris pierre en alternance
   $('.projects__slides').innerHTML = projets.map((p, i) => `
     <article class="slide" style="--bg:${slideBgs[i % 2]};--c:${esc(p.couleur)}" aria-label="Projet ${i + 1} : ${esc(p.titre)}">
