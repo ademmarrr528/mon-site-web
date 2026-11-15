@@ -17,6 +17,9 @@
    - couleur     : couleur qui remplit la ligne au survol
    - encre       : couleur du texte par-dessus cette couleur
    - description : 1 à 3 phrases (le contexte, l'idée, le résultat)
+   - apercu      : (facultatif) image en format paysage pour la grande
+                   diapositive du projet (par exemple une mise en
+                   situation sur écran) ; sinon c'est « image » qui sert
    - galerie     : (facultatif) toutes les images du projet, affichées
                    les unes sous les autres quand on clique sur
                    « Voir le projet » ; legende = petit texte sous l'image
@@ -33,13 +36,17 @@ window.PROJETS = [
     categorie: 'bannieres',
     annee: 2026,
     image: 'assets/projets/coccinelle/couverture.webp',
-    couleur: '#2A2D62',
-    encre: '#D5E18F',
-    description: "Bannières promotionnelles pour le site coccinelle.fr, sur le thème « En mai, voisinez, tout est prêt ! ». Chaque offre existe en version ordinateur (format large) et en version mobile (format carré), avec une remise en très gros pour qu'elle se lise en un coup d'œil.",
+    apercu: 'assets/projets/coccinelle/mise-en-situation.webp',
+    couleur: '#C62B1C',
+    encre: '#FFFFFF',
+    description: "Bannières promotionnelles pour le site coccinelle.fr : « En mai, voisinez, tout est prêt ! » puis le Grand jeu anniversaire de juin. Chaque offre existe en version ordinateur et en version mobile, avec une remise en très gros pour qu'elle se lise en un coup d'œil.",
     galerie: [
-      { image: 'assets/projets/coccinelle/pc-ristorante.webp', legende: 'Version ordinateur' },
-      { image: 'assets/projets/coccinelle/pc-old-el-paso.webp', legende: 'Version ordinateur' },
+      { image: 'assets/projets/coccinelle/mise-en-situation.webp', legende: 'Mise en situation' },
+      { image: 'assets/projets/coccinelle/site-coccinelle.webp', legende: 'En ligne sur coccinelle.fr' },
       { image: 'assets/projets/coccinelle/pc-persil.webp', legende: 'Version ordinateur · Les bons plans Cocci' },
+      { image: 'assets/projets/coccinelle/pc-yop.webp', legende: 'Version ordinateur · Grand jeu anniversaire, juin 2026' },
+      { image: 'assets/projets/coccinelle/pc-ristorante.webp', legende: 'Version ordinateur · En mai, voisinez' },
+      { image: 'assets/projets/coccinelle/pc-old-el-paso.webp', legende: 'Version ordinateur · En mai, voisinez' },
       { image: 'assets/projets/coccinelle/mobile-ristorante.webp', legende: 'Version mobile' },
       { image: 'assets/projets/coccinelle/mobile-old-el-paso.webp', legende: 'Version mobile' },
     ],

@@ -63,7 +63,7 @@
           <button class="pill pill--dark slide__link" type="button" data-index="${i}">Voir le projet <span class="round round--light" aria-hidden="true">→</span></button>
           ${i === 0 ? '<p class="note slide__note">Clique pour l\'agrandir</p>' : ''}
         </div>
-        <figure class="slide__media"><img src="${esc(p.image)}" alt="${esc(p.titre)}, ${esc(p.type)}" loading="lazy" width="640" height="960"></figure>
+        <figure class="slide__media${p.apercu ? ' slide__media--wide' : ''}"><img src="${esc(p.apercu || p.image)}" alt="${esc(p.titre)}, ${esc(p.type)}" loading="lazy" width="${p.apercu ? 2000 : 640}" height="${p.apercu ? 1175 : 960}"></figure>
       </div>
       <span class="slide__num" aria-hidden="true">${pad(i + 1)}</span>
     </article>`).join('');
