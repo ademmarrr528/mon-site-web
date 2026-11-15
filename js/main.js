@@ -1,7 +1,7 @@
 /* =========================================================
    PORTFOLIO ADEM MARINE — script principal
    1. Contenu : projets, menu, galerie à explorer, sélection,
-      liens, formulaire… (fonctionne même sans les animations)
+      réseaux, liens… (fonctionne même sans les animations)
    2. Animations : écran de chargement, nom qui s'écrit, sphère,
       frise horizontale, animations au scroll (GSAP + ScrollTrigger
       + SplitText) et défilement fluide (Lenis).
@@ -164,16 +164,47 @@
     else spacer.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
   });
 
-  /* ---------- Formulaire de contact (démonstration) ---------- */
-  $('.footer__form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input = $('#email-contact');
-    const msg = $('.footer__msg');
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
-    msg.textContent = ok
-      ? "Merci ! (Formulaire de démonstration : rien n'a été envoyé pour l'instant.)"
-      : 'Entre une adresse e-mail valide, par exemple prenom@email.fr.';
+  /* ---------- Réseaux : éventail de cartes (façon landonorris.com) ---------- */
+  // Place de chaque carte, du centre vers les bords : décalage x et y (en largeurs de carte) et rotation
+  const FAN = [[0, 0, 0], [0.7, 0.09, 8], [1.28, 0.3, 16], [1.74, 0.6, 24]];
+  const fan = $('.socials__fan');
+  const fanPicks = [6, 2, 8, 0, 4, 9, 1].filter((i) => i < allProjets.length);
+  const mid = (fanPicks.length - 1) / 2;
+  fan.innerHTML = fanPicks.map((idx, i) => {
+    const k = i - mid;
+    const [x, y, r] = FAN[Math.min(FAN.length - 1, Math.round(Math.abs(k)))];
+    const sign = Math.sign(k);
+    const p = allProjets[idx];
+    return `<button class="socials__card" type="button" data-index="${idx}" style="--x:${sign * x};--y:${y};--r:${sign * r};z-index:${10 - Math.round(Math.abs(k))}" aria-label="Voir ${esc(p.titre)}"><span class="socials__card-in"><img src="${esc(p.image)}" alt="" loading="lazy" width="640" height="960" draggable="false"></span></button>`;
+  }).join('');
+  const fanCards = $$('.socials__card', fan);
+  fan.addEventListener('click', (e) => {
+    const card = e.target.closest('.socials__card');
+    if (card) openViewer(allProjets[Number(card.dataset.index)]);
   });
+  // Survol : la carte grossit et les voisines s'écartent
+  function spreadFan(hovered) {
+    fanCards.forEach((card, i) => {
+      const d = hovered < 0 ? 0 : i - hovered;
+      const push = d === 0 ? 0 : Math.sign(d) * Math.max(0, 0.26 - (Math.abs(d) - 1) * 0.07);
+      card.style.setProperty('--push', `calc(var(--cw) * ${push.toFixed(3)})`);
+      card.style.setProperty('--zoom', d === 0 && hovered >= 0 ? '1.08' : '1');
+    });
+  }
+  if (finePointer) {
+    fanCards.forEach((card, i) => card.addEventListener('mouseenter', () => spreadFan(i)));
+    fan.addEventListener('mouseleave', () => spreadFan(-1));
+  }
+  // La petite icône change toute seule (manette, ballon, casque, crayon)
+  const socialIcons = $$('.socials__icon');
+  let iconIndex = 0;
+  if (!reduceMotion && socialIcons.length > 1) {
+    setInterval(() => {
+      socialIcons[iconIndex].classList.remove('is-active');
+      iconIndex = (iconIndex + 1) % socialIcons.length;
+      socialIcons[iconIndex].classList.add('is-active');
+    }, 1500);
+  }
 
   /* ---------- Méthode : bandeau au survol ---------- */
   $$('.method__item').forEach((item) => {
@@ -438,6 +469,7 @@
       .from('.hero__texts > *', { y: 24, autoAlpha: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, restAt + 0.2)
       .from('.hero__note', { autoAlpha: 0, y: -10, rotation: 14, duration: 0.8, ease: 'back.out(2)' }, restAt + 0.6)
       .from('.hero__sound-note', { autoAlpha: 0, y: 10, duration: 0.8, ease: 'back.out(2)' }, restAt + 1);
+    tl.timeScale(1.15); // un poil plus rapide
     return tl;
   }
 
@@ -571,20 +603,16 @@
       .to('.reel__box', { scale: 1, borderRadius: 0, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.3, ease: 'power2.inOut' }, 0.55)
       .to({}, { duration: 0.2 });
 
-    // 4. Manifeste : trois phrases qui s'allument puis laissent la place, le macaron tourne
-    const blocks = $$('.manifesto__block');
-    const mTl = gsap.timeline({ scrollTrigger: { trigger: '.manifesto', start: 'top top', end: '+=430%', pin: true, scrub: 1 } });
-    mTl.to('.manifesto__badge', { rotation: 200, scale: 1.12, ease: 'none', duration: blocks.length }, 0);
-    blocks.forEach((block, i) => {
-      const title = SplitText.create($('.manifesto__title', block), { type: 'words' }).words;
-      const accent = SplitText.create($('.manifesto__accent', block), { type: 'words' }).words;
-      const sub = $('.manifesto__sub', block);
-      if (i > 0) { gsap.set(block, { autoAlpha: 0 }); mTl.set(block, { autoAlpha: 1 }, i); }
-      mTl.fromTo(title, { opacity: 0.2 }, { opacity: 1, stagger: 0.03, duration: 0.3, ease: 'none' }, i);
-      if (sub) mTl.fromTo(sub, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.1 }, i + 0.28);
-      mTl.fromTo(accent, { opacity: 0, yPercent: 35 }, { opacity: 1, yPercent: 0, stagger: 0.035, duration: 0.25, ease: 'power2.out' }, i + 0.36);
-      if (i < blocks.length - 1) mTl.to(block, { autoAlpha: 0, y: -50, duration: 0.14 }, i + 0.86);
+    // 4. Réseaux (façon landonorris.com) : le titre monte, puis l'éventail de cartes s'ouvre en remontant
+    gsap.from('.socials__icons', { scale: 0, rotation: -90, duration: 1, ease: 'back.out(1.8)', scrollTrigger: { trigger: '.socials', start: 'top 70%' } });
+    const socialSplit = SplitText.create(['.socials__bold', '.socials__serif'], { type: 'lines', mask: 'lines' });
+    // le masque est retiré à la fin pour ne pas couper les accents (RÉSEAUX)
+    gsap.from(socialSplit.lines, { yPercent: 105, duration: 1.1, stagger: 0.1, ease: 'expo.out', onComplete: () => socialSplit.revert(), scrollTrigger: { trigger: '.socials__title', start: 'top 82%' } });
+    gsap.fromTo(fan, { '--open': 0, y: () => vh() * 0.3 }, {
+      '--open': 1, y: 0, ease: 'power2.out',
+      scrollTrigger: { trigger: fan, start: 'top bottom', end: 'center 58%', scrub: 1, invalidateOnRefresh: true },
     });
+    gsap.from(['.socials__follow', '.socials__links a'], { autoAlpha: 0, y: 16, duration: 0.8, stagger: 0.06, ease: 'power3.out', scrollTrigger: { trigger: '.socials__follow', start: 'top 94%' } });
 
     // 5. Définition
     const typed = SplitText.create('.typed', { type: 'chars' }).chars;
@@ -664,11 +692,17 @@
       .fromTo('.doubt__stage', { '--dark': 0.08 }, { '--dark': 0.58, duration: 0.6 }, 0.2)
       .fromTo(q3, { opacity: 0, yPercent: 40, filter: 'blur(8px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', stagger: 0.05, duration: 0.3 }, 0.25);
 
-    // 12. Contact
-    revealLines('.footer__title', '.footer');
-    const footChars = SplitText.create('.footer__logo', { type: 'chars', mask: 'chars' }).chars;
-    gsap.from(footChars, { yPercent: 110, duration: 1.1, stagger: 0.04, ease: 'expo.out', scrollTrigger: { trigger: '.footer__logo', start: 'top 92%' } });
-    gsap.from('.footer__sticker', { scale: 0, rotation: -90, duration: 1.2, ease: 'back.out(1.6)', scrollTrigger: { trigger: '.footer', start: 'top 70%' } });
+    // 12. Pied de page (façon landonorris.com) : le titre monte, la signature s'écrit, la photo remonte,
+    // les liens apparaissent un par un
+    const footWords = SplitText.create('.lfoot__title', { type: 'words', mask: 'words' }).words;
+    gsap.timeline({ scrollTrigger: { trigger: '.lfoot__panel', start: 'top 72%' } })
+      .from(footWords, { yPercent: 110, duration: 1.1, stagger: 0.07, ease: 'expo.out' })
+      .fromTo('.lfoot__sign', { clipPath: 'inset(-30% 100% -30% -10%)' }, { clipPath: 'inset(-30% -10% -30% -10%)', duration: 1.1, ease: 'power2.inOut' }, 0.4);
+    gsap.fromTo('.lfoot__portrait', { yPercent: 16 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: '.lfoot__panel', start: 'top bottom', end: 'bottom bottom', scrub: 1 } });
+    $$('.lfoot__col').forEach((col) => {
+      gsap.from($$('.lfoot__label, a', col), { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out', scrollTrigger: { trigger: col, start: 'top 92%' } });
+    });
+    gsap.from('.lfoot__cta', { yPercent: 100, duration: 0.8, ease: 'expo.out', scrollTrigger: { trigger: '.lfoot__strip', start: 'top bottom' } });
   }
 
   // Fait monter les lignes d'un texte depuis un masque
